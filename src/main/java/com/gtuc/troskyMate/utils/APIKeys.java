@@ -1,6 +1,8 @@
 package com.gtuc.troskyMate.utils;
 
+import org.springframework.stereotype.Component;
 
+@Component
 //Class for the API keys
 public class APIKeys {
 

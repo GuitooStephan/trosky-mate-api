@@ -3,7 +3,9 @@ package com.gtuc.troskyMate.logic;
 
 import com.gtuc.troskyMate.forms.JSONResponse;
 import com.gtuc.troskyMate.models.Domains.BusStations;
+import com.gtuc.troskyMate.models.Domains.BusStops;
 import com.gtuc.troskyMate.models.Services.BusStationsServices;
+import com.gtuc.troskyMate.models.Services.BusStopsServices;
 import com.gtuc.troskyMate.utils.APIKeys;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -21,13 +23,17 @@ public class RouteSelectionLogic {
 
     @Autowired
     private BusStationsServices busStationsServices;
+    @Autowired
+    private BusStopsServices busStopsServices;
+    @Autowired
     private APIKeys apiKeys;
 
     private final Logger logger = LoggerFactory.getLogger(RouteSelectionLogic.class);
 
     public String routeRequest(String origin, String destination){
 
-        logger.info("[INFO] Route request recieved");
+        logger.info("[INFO] Route request received");
+        List<String> closestBusStations = new ArrayList<String>();
         String closestBusStation = null;
 
         try{
@@ -37,9 +43,15 @@ public class RouteSelectionLogic {
 
             logger.info("[INFO] Getting the closest bus station");
             //Get the closest Bus station
-            closestBusStation = getClosestBusStation(listOfBusStations, origin, destination);
+            closestBusStations = getClosestBusStation(listOfBusStations, origin, destination);
 
             logger.info("[INFO] Associating the location and the destinations to bus stops");
+            //Associate a bus stop to the origin
+            String busStopOrigin = getClosestBusStop(origin);
+
+            //Associate a bus stop to the destination
+            String busStopDestination = getClosestBusStop(destination);
+
 
 
             
@@ -52,9 +64,9 @@ public class RouteSelectionLogic {
 
 
     //Get the closest bus station
-    public String getClosestBusStation(List<BusStations> listOfBusStations, String origin, String destination){
+    public List<String> getClosestBusStation(List<BusStations> listOfBusStations, String origin, String destination){
 
-        String closestStationName = null;
+        List<String> closestStationNames = new ArrayList<String>();
         double distanceLocationToBs = 0.0;
         double distanceDestinationToBs = 0.0;
 
@@ -83,7 +95,7 @@ public class RouteSelectionLogic {
 
                     if (temp <= closestStation){
                         closestStation = temp;
-                        closestStationName = busStation.getName();
+                        closestStationNames.add(busStation.getName());
                     }
                 }
 
@@ -94,7 +106,7 @@ public class RouteSelectionLogic {
             logger.error("[ERROR] Getting closest bus station");
         }
 
-        return closestStationName;
+        return closestStationNames;
     }
 
 
@@ -106,7 +118,7 @@ public class RouteSelectionLogic {
         try{
 
             //Url to the API
-            String url = "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=" + origin + "&destinations=" + destination + "&key=AIzaSyCUjekBM_xY-nzmgYVT6e44gMIKas8R-LM";
+            String url = "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=" + origin + "&destinations=" + destination + "&mode=walking&key=AIzaSyCUjekBM_xY-nzmgYVT6e44gMIKas8R-LM";
 
             //Make a call to the Distance Matrix API
             RestTemplate restTemplate = new RestTemplate();
@@ -123,12 +135,69 @@ public class RouteSelectionLogic {
 
             // Split distance text string
             String[] parts = distanceText.split(" ", 2);
-            distanceBetweenTwoCoordinates = Double.parseDouble(parts[0]);
+            if(parts[1].equals("ft")){
+                distanceBetweenTwoCoordinates = 0.0;
+            } else{
+                distanceBetweenTwoCoordinates = Double.parseDouble(parts[0]);
+            }
 
         } catch (Exception e){
             logger.error("[ERROR] Check Distance Matrix Function");
         }
 
         return distanceBetweenTwoCoordinates;
+    }
+
+    //Associate coordinates to a bus stop
+    public String getClosestBusStop(String coordinates){
+        String busStopName = null;
+
+        try{
+            //Build the url for the API call
+            String url = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + coordinates + "&result_type=locality&key=" + apiKeys.getDistanceMatrixKey();
+            RestTemplate restTemplate = new RestTemplate();
+
+            int i = 0;
+            double temp = 0.0;
+            double closestBusStop = 0.0;
+
+            //Get the result
+            String response = restTemplate.getForObject(url, String.class);
+
+            //Getting the information
+            JSONObject obj = new JSONObject(response);
+            JSONArray results = obj.getJSONArray("results");
+            JSONObject addressComponentsObject = results.getJSONObject(0);
+            JSONArray addressComponents = addressComponentsObject.getJSONArray("address_components");
+            JSONObject infoObject = addressComponents.getJSONObject(0);
+            String currentLocation = infoObject.getString("long_name");
+
+            //Find the bus Stops in the area
+            List<BusStops> busStopsList = busStopsServices.findByArea(currentLocation);
+
+            //Get the closest bus stop and associate it to your location
+            for(BusStops busStop : busStopsList){
+                //Get distance between busStop and location
+                temp = getDistanceBetweenTwoCoordinates(coordinates, busStop.getLocation());
+
+                //For the first loop
+                if(i == 0) {
+                    closestBusStop = temp;
+                }
+
+                //Get the closest bus stop
+                if(temp <= closestBusStop){
+                    closestBusStop = temp;
+                    busStopName = busStop.getName();
+                }
+
+                i++;
+            }
+
+        } catch(Exception e){
+            logger.error("[ERROR] Associate closest bus stop");
+        }
+
+        return busStopName;
     }
 }
