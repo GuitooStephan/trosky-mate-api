@@ -1,10 +1,13 @@
 package com.gtuc.troskyMate.forms;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class JSONResponse {
 
     private int status ;
     private String message;
-    private Object result;
+    private List<Object> result = new ArrayList<Object>();
 
 
     public int getStatus() {
@@ -23,11 +26,11 @@ public class JSONResponse {
         this.message = message;
     }
 
-    public Object getResult() {
+    public List<Object> getResult() {
         return result;
     }
 
     public void setResult(Object result) {
-        this.result = result;
+        this.result.add(result);
     }
 }

@@ -1,54 +1,85 @@
 package com.gtuc.troskyMate.models.Domains;
 
-
-import org.springframework.data.annotation.Id;
+import org.neo4j.ogm.annotation.GraphId;
+import org.neo4j.ogm.annotation.Index;
+import org.neo4j.ogm.annotation.NodeEntity;
 import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "busStops")
+@NodeEntity(label = "busStops")
 public class BusStops {
 
-    @Id
-    private String _id ;
+    @GraphId
+    private
+    Long id ;
 
-    @Indexed
-    private String name ;
+    private int busStopId;
 
-    @Indexed
-    private String [] area;
+    @Index(unique = true)
+    private String busStopName ;
 
-    private String location;
+    private String [] busStopArea;
+
+    private int circleLapazRoute;
+
+    private int lapazCircleRoute;
+
+    private String busStopLocation;
 
 
-    public String get_id() {
-        return _id;
+    public Long getId() {
+        return id;
     }
 
-    public void set_id(String _id) {
-        this._id = _id;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public int getBusStopId() {
+        return busStopId;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setBusStopId(int busStopId) {
+        this.busStopId = busStopId;
     }
 
-    public String[] getArea() {
-        return area;
+    public String getBusStopName() {
+        return busStopName;
     }
 
-    public void setArea(String[] area) {
-        this.area = area;
+    public void setBusStopName(String busStopName) {
+        this.busStopName = busStopName;
     }
 
-    public String getLocation() {
-        return location;
+    public String[] getBusStopArea() {
+        return busStopArea;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setBusStopArea(String[] busStopArea) {
+        this.busStopArea = busStopArea;
     }
+
+    public int getCircleLapazRoute() {
+        return circleLapazRoute;
+    }
+
+    public void setCircleLapazRoute(int circleLapazRoute) {
+        this.circleLapazRoute = circleLapazRoute;
+    }
+
+    public int getLapazCircleRoute() {
+        return lapazCircleRoute;
+    }
+
+    public void setLapazCircleRoute(int lapazCircleRoute) {
+        this.lapazCircleRoute = lapazCircleRoute;
+    }
+
+    public String getBusStopLocation() {
+        return busStopLocation;
+    }
+
+    public void setBusStopLocation(String busStopLocation) {
+        this.busStopLocation = busStopLocation;
+    }
+
 }

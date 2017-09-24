@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.*;
 public class TroskyMateController {
 
     @Autowired
-    RouteSelectionLogic routeSelectionLogic;
+    private RouteSelectionLogic routeSelectionLogic;
 
     @CrossOrigin(origins = "http://localhost:8100")
     @RequestMapping(value = {"/getRoute"} , method = RequestMethod.GET)
     @ResponseBody
-    public String getRoute(
+    public JSONResponse getRoute(
             @RequestParam String origin,
             @RequestParam String destination
     ){

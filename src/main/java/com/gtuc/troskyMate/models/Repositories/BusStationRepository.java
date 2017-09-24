@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.util.List;
 
 @Repository
-public interface BusStationRepositories extends MongoRepository<BusStations, Serializable> {
+public interface BusStationRepository extends MongoRepository<BusStations, Serializable> {
 
     BusStations findByName(String name);
 
