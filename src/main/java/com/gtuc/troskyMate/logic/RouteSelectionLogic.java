@@ -1,6 +1,7 @@
 package com.gtuc.troskyMate.logic;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gtuc.troskyMate.forms.JSONResponse;
 import com.gtuc.troskyMate.models.Domains.BusStations;
 import com.gtuc.troskyMate.models.Domains.BusStops;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -44,41 +46,67 @@ public class RouteSelectionLogic {
 
         try{
             logger.info("[INFO] Associating the location and the destinations to bus stops");
+
             //Associate a bus stop to the origin
             String busStopOrigin = getClosestBusStop(origin);
 
             //Associate a bus stop to the destination
             String busStopDestination = getClosestBusStop(destination);
 
+            //Check if we have a bus stop for the origin and one for the destination
             if(busStopOrigin != null && busStopDestination != null){
+                //Try to get a bus for the route
                 logger.info("[INFO] Getting the route and the buses");
                 Buses bus = getRequestBuses(busStopOrigin, busStopDestination);
 
+                //Check if we found a bus then get the bus stops
+                if (bus != null){
+
+                    logger.info("[INFO] Getting the bus stops");
+                    response = getBusStops(bus, busStopOrigin, busStopDestination);
+
+                } else {
+
+                    //Try to get buses for the route
+                    logger.info("[INFO] There is no direct bus");
+
+                    logger.info("[INFO] Fetching the bus stations information");
+                    //Fetching all the data about the bus stations
+                    List<BusStations> listOfBusStations = busStationsServices.findAll();
+
+                    logger.info("[INFO] Getting the closest bus station");
+                    //Get the closest Bus station
+                    String closestBusStation = getClosestBusStation(listOfBusStations, origin);
+
+                    logger.info("[INFO] Getting a bus to the closest bus station");
+                    //Get a bus that stops at your bus stop and the closest bus station
+                    Buses busOne = busesServices.findBusStopingAtOneStopOneStation(busStopOrigin, closestBusStation);
+
+                    Buses busTwo = busesServices.findBusStopingAtOneStationOneStop(busStopDestination, closestBusStation);
+
+                    response.setStatus(202);
+                    response.setMessage("Successful");
+                    response.setBuses(busOne);
+                    response.setBuses(busTwo);
+                    return response;
+                }
+
+                //Prepare Response
                 response.setStatus(202);
                 response.setMessage("Successful");
-                response.setResult(bus);
+                response.setBuses(bus);
                 return response;
-            } else if (busStopOrigin != null){
-                //There is no direct bus
-                logger.info("[INFO] There is no direct bus");
-
-                logger.info("[INFO] Fetching the bus stations information");
-                //Fetching all the data about the bus stations
-                List<BusStations> listOfBusStations = busStationsServices.findAll();
-
-                logger.info("[INFO] Getting the closest bus station");
-                //Get the closest Bus station
-                String closestBusStation = getClosestBusStation(listOfBusStations, origin);
-
-                logger.info("[INFO] Getting a bus to the closest bus station");
-                //Get a bus that stops at your bus stop and the closest bus station
             }
+
+            response.setStatus(404);
+            response.setMessage("No bus found");
+            return response;
 
         }catch (Exception e){
             logger.error("[ERROR] Getting route");
             response.setStatus(404);
             response.setMessage("Error occurred");
-            response.setResult(null);
+            response.setBuses(null);
         }
 
         return response;
@@ -90,8 +118,6 @@ public class RouteSelectionLogic {
 
         String closestStationName = null;
         double distanceLocationToBs = 0.0;
-
-        double temp = 0.0;
         double closestStation = 0.0;
         int i = 0;
 
@@ -104,13 +130,12 @@ public class RouteSelectionLogic {
 
                 //On the first loop
                 if(i == 0){
-                    temp = distanceLocationToBs;
-                    closestStation = temp;
+                    closestStation = distanceLocationToBs;
                 }
 
                 //Check if the current distance is smaller than the shortest distance
-                if (temp <= closestStation){
-                    closestStation = temp;
+                if(distanceLocationToBs <= closestStation){
+                    closestStation = distanceLocationToBs;
                     closestStationName = busStation.getName();
                 }
 
@@ -219,13 +244,12 @@ public class RouteSelectionLogic {
     //Get the buses for the request
     private Buses getRequestBuses(String busStopOrigin, String busStopDestination){
 
-        Buses mybus = new Buses();
+        Buses myBus = new Buses();
         //Find bus which stop at the two bus stops
         List<Buses> busesList = busesServices.findBusStopingAtTwoBusStops(busStopOrigin, busStopDestination);
         for (Buses bus : busesList){
             //Get the route of the bus
-            String [] busNameParts = bus.getBusName().split("-", 2);
-            String route = busNameParts[0].toLowerCase() + busNameParts[1] + "Route";
+            String route = splitStringForRoute(bus.getBusName());
 
             //Get the position of the bus stop in the route
             BusStops stopOrigin = busStopsServices.findBusStop(busStopOrigin);
@@ -240,7 +264,57 @@ public class RouteSelectionLogic {
             }
         }
 
-        return mybus;
+        return myBus;
+    }
+
+    //Get the bus stops for the request
+    private JSONResponse getBusStops(Buses bus, String busStopOrigin, String busStopDestination){
+        JSONResponse response = new JSONResponse();
+
+        try {
+            //Getting route
+            String route = splitStringForRoute(bus.getBusName());
+
+            //Get the position of the bus stop in the route
+            BusStops stopOrigin = busStopsServices.findBusStop(busStopOrigin);
+            BusStops stopDestination = busStopsServices.findBusStop(busStopDestination);
+
+            int routePositionOfOrigin = getPositionOnRoute(stopOrigin, route);
+            int routePositionOfDestination = getPositionOnRoute(stopDestination, route);
+
+            //Get the bus stop of the bus
+            List<BusStops> temp = busStopsServices.findBusStopsForBus(bus.getBusName(), route);
+
+            //Add the first bus stop
+            response.setBusStops(stopOrigin);
+
+            //Create a JSON out of the bus stops
+            JSONArray array = new JSONArray(temp);
+
+            for(int i = routePositionOfOrigin + 1 ; i < routePositionOfDestination; i++){
+                for (int j = 0 ; j < array.length(); j++){
+                    JSONObject obj = array.getJSONObject(j);
+                    if (obj.getInt(route) == i){
+                        ObjectMapper mapper =  new ObjectMapper();
+                        BusStops busStop = mapper.readValue(obj.toString(), BusStops.class);
+                        response.setBusStops(busStop);
+                    }
+                }
+            }
+
+            //Add the last bus stop
+            response.setBusStops(stopDestination);
+        } catch (Exception e){
+            logger.error("[ERROR] Getting the bus stops");
+        }
+
+        return response;
+    }
+
+    private String splitStringForRoute(String busName){
+        String [] busNameParts = busName.split("-", 2);
+
+        return busNameParts[0].toLowerCase() + busNameParts[1] + "Route";
     }
 
     private int getPositionOnRoute(BusStops busStops, String route){

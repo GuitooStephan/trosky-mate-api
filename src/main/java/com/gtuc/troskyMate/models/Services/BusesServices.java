@@ -18,4 +18,9 @@ public class BusesServices {
     //Get Buses that stops at two bus stops
     public List<Buses> findBusStopingAtTwoBusStops(String busStopOrigin, String busStopDestination){return repositories.findBusStopingAtTwoBusStops(busStopOrigin, busStopDestination);}
 
+    //Get Buses that stops at a bus stop and go to a station
+    public Buses findBusStopingAtOneStopOneStation(String busStopOrigin, String busStationName){return repositories.findBusStopingAtOneStopOneStation(busStopOrigin, busStationName);}
+
+    //Get bus that leave a station and stop at a stop
+    public Buses findBusStopingAtOneStationOneStop(String busStopOrigin, String busStationName){return repositories.findBusStopingAtOneStationOneStop(busStopOrigin, busStationName);}
 }

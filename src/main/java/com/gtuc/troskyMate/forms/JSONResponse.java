@@ -1,5 +1,8 @@
 package com.gtuc.troskyMate.forms;
 
+import com.gtuc.troskyMate.models.Domains.BusStops;
+import com.gtuc.troskyMate.models.Domains.Buses;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,7 +10,8 @@ public class JSONResponse {
 
     private int status ;
     private String message;
-    private List<Object> result = new ArrayList<Object>();
+    private List<Buses> buses = new ArrayList<Buses>();
+    private List<Object> busStops = new ArrayList<Object>();
 
 
     public int getStatus() {
@@ -26,11 +30,19 @@ public class JSONResponse {
         this.message = message;
     }
 
-    public List<Object> getResult() {
-        return result;
+    public List<Buses> getBuses() {
+        return buses;
     }
 
-    public void setResult(Object result) {
-        this.result.add(result);
+    public void setBuses(Buses buses) {
+        this.buses.add(buses);
+    }
+
+    public List<Object> getBusStops() {
+        return busStops;
+    }
+
+    public void setBusStops(Object busStops) {
+        this.busStops.add(busStops);
     }
 }

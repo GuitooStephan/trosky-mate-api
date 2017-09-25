@@ -16,4 +16,7 @@ public interface BusStopsRepository extends GraphRepository<BusStops>{
     //Query for bus stops
     @Query("match (stop:busStops) where stop.busStopName={0} return stop")
     BusStops findBusStop(String busStopName);
+
+    @Query("match (bus:buses {busName:{0}}) - [:stopAt] -> (busStop:busStops) return busStop")
+    List<BusStops> findBusStopsForBus(String busName, String route);
 }
