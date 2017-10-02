@@ -19,11 +19,18 @@ public class BusStops {
 
     private String [] busStopArea;
 
+    @Index(unique = true)
     private int circleLapazRoute;
 
+    @Index(unique = true)
     private int lapazCircleRoute;
 
+    @Index(unique = true)
+    private int lapazSakumonojunctionRoute;
+
     private String busStopLocation;
+
+    private int onBusIndexRoute;
 
 
     public Long getId() {
@@ -82,4 +89,19 @@ public class BusStops {
         this.busStopLocation = busStopLocation;
     }
 
+    public int getLapazSakumonojunctionRoute() {
+        return lapazSakumonojunctionRoute;
+    }
+
+    public void setLapazSakumonojunctionRoute(int lapazSakumonojunctionRoute) {
+        this.lapazSakumonojunctionRoute = lapazSakumonojunctionRoute;
+    }
+
+    public int getOnBusIndexRoute() {
+        return onBusIndexRoute;
+    }
+
+    public void setOnBusIndexRoute(int onBusIndexRoute) {
+        this.onBusIndexRoute = onBusIndexRoute;
+    }
 }

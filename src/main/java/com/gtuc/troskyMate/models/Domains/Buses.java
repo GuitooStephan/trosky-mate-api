@@ -12,6 +12,7 @@ public class Buses {
     @Index(unique = true)
     private Long busId ;
 
+    @Index(unique = true)
     private String busName;
 
     private String busOrigin;

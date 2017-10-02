@@ -21,5 +21,5 @@ public class BusStopsServices {
 
 
     //Query all bus stops from origin to destination
-    public List<BusStops> findBusStopsForBus(String busName, String route) {return repositories.findBusStopsForBus(busName, route);}
+    public List<BusStops> findBusStopsForBus(String busName) {return repositories.findBusStopsForBus(busName);}
 }

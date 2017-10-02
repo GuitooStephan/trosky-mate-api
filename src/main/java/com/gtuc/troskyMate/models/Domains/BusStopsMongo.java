@@ -17,6 +17,7 @@ public class BusStopsMongo {
     @Indexed
     private String [] area;
 
+
     private String location;
 
 

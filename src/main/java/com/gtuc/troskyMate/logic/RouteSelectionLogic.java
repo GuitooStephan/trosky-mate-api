@@ -60,12 +60,12 @@ public class RouteSelectionLogic {
                 Buses bus = getRequestBuses(busStopOrigin, busStopDestination);
 
                 //Check if we found a bus then get the bus stops
-                if (bus != null){
+                if (bus.getBusName() != null){
 
                     logger.info("[INFO] Getting the bus stops");
                     response = getBusStops(bus, busStopOrigin, busStopDestination);
 
-                } else {
+                } else if (bus.getBusName() == null){
 
                     //Try to get buses for the route
                     logger.info("[INFO] There is no direct bus");
@@ -78,23 +78,43 @@ public class RouteSelectionLogic {
                     //Get the closest Bus station
                     String closestBusStation = getClosestBusStation(listOfBusStations, origin);
 
-                    logger.info("[INFO] Getting a bus to the closest bus station");
+                    logger.info("[INFO] Getting the two buses");
                     //Get a bus that stops at your bus stop and the closest bus station
                     Buses busOne = busesServices.findBusStopingAtOneStopOneStation(busStopOrigin, closestBusStation);
-
                     Buses busTwo = busesServices.findBusStopingAtOneStationOneStop(busStopDestination, closestBusStation);
 
-                    response.setStatus(202);
-                    response.setMessage("Successful");
+                    logger.info("[INFO] Getting the bus stops");
+                    response = getBusStopsForTwoBuses(busOne,busTwo, busStopOrigin , busStopDestination , closestBusStation);
+
+                    //Insert the buses
                     response.setBuses(busOne);
                     response.setBuses(busTwo);
+
+                    //Handle errors
+                    if(response.getBuses().isEmpty()){
+                        response.setStatus(404);
+                        response.setMessage("No bus found");
+                        return response;
+                    }
+
+                    //Handle request
+                    response.setStatus(202);
+                    response.setMessage("Successful");
+                    return response;
+                }
+                //Insert buses
+                response.setBuses(bus);
+
+                //Handle errors
+                if(response.getBuses().isEmpty()){
+                    response.setStatus(404);
+                    response.setMessage("No bus found");
                     return response;
                 }
 
                 //Prepare Response
                 response.setStatus(202);
                 response.setMessage("Successful");
-                response.setBuses(bus);
                 return response;
             }
 
@@ -283,29 +303,75 @@ public class RouteSelectionLogic {
             int routePositionOfDestination = getPositionOnRoute(stopDestination, route);
 
             //Get the bus stop of the bus
-            List<BusStops> temp = busStopsServices.findBusStopsForBus(bus.getBusName(), route);
+            List<BusStops> temp = busStopsServices.findBusStopsForBus(bus.getBusName());
 
-            //Add the first bus stop
+            //Add the first bus stop to the response
             response.setBusStops(stopOrigin);
 
             //Create a JSON out of the bus stops
             JSONArray array = new JSONArray(temp);
 
-            for(int i = routePositionOfOrigin + 1 ; i < routePositionOfDestination; i++){
-                for (int j = 0 ; j < array.length(); j++){
-                    JSONObject obj = array.getJSONObject(j);
-                    if (obj.getInt(route) == i){
-                        ObjectMapper mapper =  new ObjectMapper();
-                        BusStops busStop = mapper.readValue(obj.toString(), BusStops.class);
-                        response.setBusStops(busStop);
-                    }
-                }
-            }
+            //Loop tru list and get the various stops
+            response = fillResponseWithBusStops(response, routePositionOfOrigin + 1, routePositionOfDestination , array.length(), array, route , 0);
 
-            //Add the last bus stop
+            //Add the last bus stop to the response
             response.setBusStops(stopDestination);
         } catch (Exception e){
             logger.error("[ERROR] Getting the bus stops");
+            response.setStatus(404);
+            response.setMessage("No bus found");
+            return response;
+        }
+
+        return response;
+    }
+
+    //Get the bus stops for two buses
+    private JSONResponse getBusStopsForTwoBuses(Buses busOne, Buses busTwo, String busStopOriginName, String busStopDestinationName , String busStationName){
+        JSONResponse response = new JSONResponse();
+
+        try {
+
+            //Getting the routes for the first and second buses
+            String routeOne = splitStringForRoute(busOne.getBusName());
+            String routeTwo = splitStringForRoute(busTwo.getBusName());
+
+            //Getting the bus stops involved origin and destination
+            BusStops busStopOrigin = busStopsServices.findBusStop(busStopOriginName);
+            BusStops busStopDestination = busStopsServices.findBusStop(busStopDestinationName);
+
+            //Getting the bus stops positions origin and destination
+            int busStopOriginPosition = getPositionOnRoute(busStopOrigin, routeOne);
+            int busStopDestinationPosition = getPositionOnRoute(busStopDestination, routeTwo);
+
+            //Get the bus stop for the busOne and busTwo
+            List<BusStops> tempOne = busStopsServices.findBusStopsForBus(busOne.getBusName());
+            List<BusStops> tempTwo = busStopsServices.findBusStopsForBus(busTwo.getBusName());
+
+            //Add the first Bus stop
+            response.setBusStops(busStopOrigin);
+
+            //Create a JSON out of the bus stops of bus one
+            JSONArray arrayOne = new JSONArray(tempOne);
+
+            //Loop thru the array and getting the various bus stops for Bus One
+            response = fillResponseWithBusStops(response, busStopOriginPosition + 1, arrayOne.length(), arrayOne.length(), arrayOne , routeOne, 0);
+
+            //Loop thru the array and getting the various bus stops for Bus two
+            JSONArray arrayTwo = new JSONArray(tempTwo);
+
+            //Loop thru the array and getting the various bus stops for Bus Two
+            response = fillResponseWithBusStops(response , 1, busStopDestinationPosition, arrayTwo.length(), arrayTwo, routeTwo, 1);
+
+            //Add the destination bus stop
+            busStopDestination.setOnBusIndexRoute(1);
+            response.setBusStops(busStopDestination);
+
+        } catch (Exception e){
+            logger.error("[ERROR] Getting bus stops for two buses");
+            response.setStatus(404);
+            response.setMessage("No bus found");
+            return response;
         }
 
         return response;
@@ -321,5 +387,25 @@ public class RouteSelectionLogic {
         JSONObject obj = new JSONObject(busStops);
 
         return obj.getInt(route);
+    }
+
+    private JSONResponse fillResponseWithBusStops(JSONResponse response, int iBeginning, int iEnding, int jEnding, JSONArray array, String route, int busIndex){
+
+        try {
+            for(int i = iBeginning; i < iEnding; i++){
+                for (int j = 0; j < jEnding; j++){
+                    JSONObject obj = array.getJSONObject(j);
+                    if(obj.getInt(route) == i){
+                        ObjectMapper mapper = new ObjectMapper();
+                        BusStops busStop = mapper.readValue(obj.toString(), BusStops.class);
+                        busStop.setOnBusIndexRoute(busIndex);
+                        response.setBusStops(busStop);
+                    }
+                }
+            }
+        } catch (Exception e){
+            logger.error("[ERROR] Getting Bus Stops");
+        }
+        return response;
     }
 }
