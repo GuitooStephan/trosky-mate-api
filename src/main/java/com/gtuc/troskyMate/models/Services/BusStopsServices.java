@@ -22,4 +22,13 @@ public class BusStopsServices {
 
     //Query all bus stops from origin to destination
     public List<BusStops> findBusStopsForBus(String busName) {return repositories.findBusStopsForBus(busName);}
+
+    //Get the stations leading to a specific busStation
+    public List<String> findAllBusStationsLeadingToBusStop(String busStopName) {return repositories.findAllBusStationsLeadingToBusStop(busStopName);}
+
+    //Get data about bus stations
+    public BusStops findBusStation(String stationName) {return repositories.findBusStation(stationName);}
+
+    //Get bus stop in an area
+    public List<BusStops> findBusStopInArea(String areaName) {return repositories.findBusStopInArea(areaName);}
 }

@@ -15,8 +15,10 @@ public class Buses {
     @Index(unique = true)
     private String busName;
 
+    @Index
     private String busOrigin;
 
+    @Index
     private String busDestination;
 
 //    @Relationship(type="hasBus", direction = "INCOMING")

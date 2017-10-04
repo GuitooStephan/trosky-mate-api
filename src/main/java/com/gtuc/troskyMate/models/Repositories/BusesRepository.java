@@ -2,7 +2,6 @@ package com.gtuc.troskyMate.models.Repositories;
 
 import com.gtuc.troskyMate.models.Domains.Buses;
 import org.springframework.data.neo4j.annotation.Query;
-import org.springframework.data.neo4j.annotation.QueryResult;
 import org.springframework.data.neo4j.repository.GraphRepository;
 import org.springframework.stereotype.Repository;
 

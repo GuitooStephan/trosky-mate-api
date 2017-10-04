@@ -17,6 +17,7 @@ public class BusStops {
     @Index(unique = true)
     private String busStopName ;
 
+    @Index
     private String [] busStopArea;
 
     @Index(unique = true)
