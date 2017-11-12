@@ -11,7 +11,7 @@ public class JSONResponse {
     private int status ;
     private String message;
     private List<Buses> buses = new ArrayList<Buses>();
-    private List<Object> busStops = new ArrayList<Object>();
+    private List<Paths> paths = new ArrayList<Paths>();
 
 
     public int getStatus() {
@@ -38,11 +38,15 @@ public class JSONResponse {
         this.buses.add(buses);
     }
 
-    public List<Object> getBusStops() {
-        return busStops;
+    public List<Paths> getPaths() {
+        return paths;
     }
 
-    public void setBusStops(Object busStops) {
-        this.busStops.add(busStops);
+    public void setPaths(List<Paths> paths) {
+        this.paths = paths;
+    }
+
+    public void setPaths(Paths paths) {
+        this.paths.add(paths);
     }
 }

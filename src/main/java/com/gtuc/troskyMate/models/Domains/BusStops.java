@@ -3,7 +3,6 @@ package com.gtuc.troskyMate.models.Domains;
 import org.neo4j.ogm.annotation.GraphId;
 import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
-import org.springframework.data.mongodb.core.index.Indexed;
 
 @NodeEntity(label = "busStops")
 public class BusStops {
@@ -20,18 +19,16 @@ public class BusStops {
     @Index
     private String [] busStopArea;
 
-    @Index(unique = true)
+
     private int circleLapazRoute;
 
-    @Index(unique = true)
     private int lapazCircleRoute;
 
-    @Index(unique = true)
+    private int circleDomeRoute;
+
     private int lapazSakumonojunctionRoute;
 
     private String busStopLocation;
-
-    private int onBusIndexRoute;
 
 
     public Long getId() {
@@ -98,11 +95,11 @@ public class BusStops {
         this.lapazSakumonojunctionRoute = lapazSakumonojunctionRoute;
     }
 
-    public int getOnBusIndexRoute() {
-        return onBusIndexRoute;
+    public int getCircleDomeRoute() {
+        return circleDomeRoute;
     }
 
-    public void setOnBusIndexRoute(int onBusIndexRoute) {
-        this.onBusIndexRoute = onBusIndexRoute;
+    public void setCircleDomeRoute(int circleDomeRoute) {
+        this.circleDomeRoute = circleDomeRoute;
     }
 }
