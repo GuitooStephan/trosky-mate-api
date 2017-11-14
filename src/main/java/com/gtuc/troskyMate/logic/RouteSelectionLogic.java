@@ -60,12 +60,21 @@ public class RouteSelectionLogic {
             while ( (busStopsServices.findNumberOfPathsByRadius(busStopOrigin.getBusStopName(), busStopDestination.getBusStopName(), radius)) < 1 ){
                 radius = radius + 2;
                 if (radius > 8){
-                    return displayNoBusFound(response);
+                    break;
                 }
             }
 
             //Get all paths taking user to his destination
-            pathsObject = busStopsServices.findPaths(busStopOrigin.getBusStopName(), busStopDestination.getBusStopName(), radius);
+            if (radius > 8){
+                List<BusStops> transitBusStops = handleNonConnectedPath(busStopOrigin, busStopDestination);
+                List<List<String>> paths = getPathsFromNonConnectedRoute(transitBusStops, busStopOrigin, busStopDestination);
+                if (paths.size() >= 2){
+                    response = setResponse(response, paths.get(0));
+                    response = setResponse(response, paths.get(1));
+                    return response;
+                } else return displayNoBusFound(response);
+
+            } else pathsObject = busStopsServices.findPaths(busStopOrigin.getBusStopName(), busStopDestination.getBusStopName(), radius);
 
             //Getting the correct paths with the correct buses
             pathsObject = filterPathsForCorrectOnes(pathsObject);
@@ -75,7 +84,7 @@ public class RouteSelectionLogic {
             List<String> path = getShortestPath(pathsObject);
 
             logger.info("[INFO] Setting response");
-            response = setResponse(path);
+            response = setResponse(response , path);
 
         }catch (Exception e){
             logger.info(e.toString());
@@ -500,7 +509,6 @@ public class RouteSelectionLogic {
 
     }
 
-
     //Get buses on path
     private List<String> getBusesOnPath(List<String> path){
         List<String> busNames = new ArrayList<String>();
@@ -519,51 +527,54 @@ public class RouteSelectionLogic {
         return busNames;
     }
 
-    private JSONResponse setResponse(List<String> path){
-        JSONResponse response = new JSONResponse();
+    private JSONResponse setResponse(JSONResponse response, List<String> path){
 
-        //Get Buses in path
-        List<String> busNames = getBusesOnPath(path);
-        for (String busName : busNames){
-            response.setBuses(busesServices.findBus(busName));
-        }
+        try {
 
-        //Get BusStops in path
-        int busIndex = 0 ;
-        JSONArray objs = new JSONArray(path);
-        for (int i = 0; i < objs.length(); i++){
-            JSONObject pathSegments = objs.getJSONObject(i);
-
-            //Whenever you land on a bus
-            if (pathSegments.has("busName")) {
-
-                //Get his route
-                String route = splitBusNameForRoute(pathSegments.getString("busName"));
-
-                //Get the position of the bus stop before the bus and after the bus
-                JSONObject originBusStop = objs.getJSONObject(i - 2);
-                JSONObject destinationBusStop = objs.getJSONObject(i + 2);
-
-                int originBusStopPositionOnRoute = originBusStop.getInt(route);
-                int destinationBusStopPositionOnRoute = destinationBusStop.getInt(route);
-
-                //Generate another path for the response
-                Paths paths = new Paths(busIndex, getBusStops(pathSegments.getString("busName"), route, originBusStopPositionOnRoute, destinationBusStopPositionOnRoute));
-
-                //Insert paths in response
-                response.setPaths(paths);
-
-                busIndex++;
+            //Get Buses in path
+            List<String> busNames = getBusesOnPath(path);
+            for (String busName : busNames){
+                response.setBuses(busesServices.findBus(busName));
             }
+
+            //Get BusStops in path
+            JSONArray objs = new JSONArray(path);
+            for (int i = 0; i < objs.length(); i++){
+                JSONObject pathSegments = objs.getJSONObject(i);
+
+                //Whenever you land on a bus
+                if (pathSegments.has("busName")) {
+
+                    //Get his route
+                    String route = splitBusNameForRoute(pathSegments.getString("busName"));
+
+                    //Get the position of the bus stop before the bus and after the bus
+                    JSONObject originBusStop = objs.getJSONObject(i - 2);
+                    JSONObject destinationBusStop = objs.getJSONObject(i + 2);
+
+                    int originBusStopPositionOnRoute = originBusStop.getInt(route);
+                    int destinationBusStopPositionOnRoute = destinationBusStop.getInt(route);
+
+                    //Generate another path for the response
+                    Paths paths = new Paths(getBusStops(pathSegments.getString("busName"), route, originBusStopPositionOnRoute, destinationBusStopPositionOnRoute));
+
+                    //Insert paths in response
+                    response.setPaths(paths);
+                }
+            }
+
+            //Set response status and message
+            response.setStatus(202);
+            response.setMessage("Successful Processing");
+
+            return response;
+        } catch (Exception e){
+            logger.error("[ERROR] Setting Response");
+            response.setStatus(404);
+            response.setMessage("No Bus Found");
+            return response;
         }
-
-        //Set response status and message
-        response.setStatus(202);
-        response.setMessage("Successful Processing");
-
-        return response;
     }
-
 
     //Get the bus stops for the request
     private List<BusStops> getBusStops(String busName, String route, int routePositionOfOrigin, int routePositionOfDestination){
@@ -591,5 +602,77 @@ public class RouteSelectionLogic {
         }
 
         return listOfBusStopsForPath;
+    }
+
+    //Handles the non connected path
+    private List<BusStops> handleNonConnectedPath(BusStops busStopOrigin, BusStops busStopDestination){
+        List<BusStops> transitStops = new ArrayList<BusStops>();
+
+        List<BusStops> busStopsAssociatedToDestination = busStopsServices.findBusStopsConnectedToBusStop(busStopDestination.getBusStopName());
+
+        List<BusStops> closestBusStops = sortBusStopsList(busStopsAssociatedToDestination, busStopOrigin.getBusStopLocation());
+
+        List<BusStops> busStopsAssociatedToOrigin = busStopsServices.findBusStopsConnectedToBusStop(busStopOrigin.getBusStopName());
+
+        int index = 0;
+        BusStops transitBusStop = new BusStops();
+
+        while (index < closestBusStops.size()){
+            transitBusStop = getClosestBusStopsToCoordinates(busStopsAssociatedToOrigin, closestBusStops.get(index).getBusStopLocation());
+
+            if (!Strings.isNullOrEmpty(transitBusStop.getBusStopName())){
+                if(isConnected(busStopOrigin.getBusStopName(), transitBusStop.getBusStopName()) && isConnected(closestBusStops.get(index).getBusStopName(), busStopDestination.getBusStopName())){
+                    transitStops.add(transitBusStop);
+                    transitStops.add(closestBusStops.get(index));
+                    return transitStops;
+                }
+            }
+
+            index++;
+        }
+        return transitStops;
+    }
+
+    private Boolean isConnected(String busStopOne, String busStopTwo){
+        int radius = 2;
+        while ( (busStopsServices.findNumberOfPathsByRadius(busStopOne, busStopTwo, radius)) < 1 ){
+            radius = radius + 2;
+            if (radius > 8){
+                return false;
+            }
+        }
+        return filterPathsForCorrectOnes(busStopsServices.findPaths(busStopOne, busStopTwo, radius)).size() >= 1;
+    }
+
+    private int radiusForPath(String busStopOne, String busStopTwo){
+        int radius = 2;
+        while ( (busStopsServices.findNumberOfPathsByRadius(busStopOne, busStopTwo, radius)) < 1 ){
+            radius = radius + 2;
+            if (radius > 8){
+                return 0;
+            }
+        }
+        return radius;
+    }
+
+    private List<List<String>> getPathsFromNonConnectedRoute(List<BusStops> transitStops, BusStops busStopOrigin, BusStops busStopDestination){
+        List<List<String>> finalPaths = new ArrayList<List<String>>();
+
+        int radiusOne = radiusForPath(busStopOrigin.getBusStopName(), transitStops.get(0).getBusStopName());
+        List<List<String>> pathsOne = busStopsServices.findPaths(busStopOrigin.getBusStopName(), transitStops.get(0).getBusStopName(), radiusOne);
+
+        int radiusTwo = radiusForPath(transitStops.get(1).getBusStopName(), busStopDestination.getBusStopName());
+        List<List<String>> pathsTwo = busStopsServices.findPaths(transitStops.get(1).getBusStopName(), busStopDestination.getBusStopName(), radiusTwo);
+
+        pathsOne = filterPathsForCorrectOnes(pathsOne);
+        pathsTwo = filterPathsForCorrectOnes(pathsTwo);
+
+        List<String> pathOne = getShortestPath(pathsOne);
+        List<String> pathTwo = getShortestPath(pathsTwo);
+
+        finalPaths.add(pathOne);
+        finalPaths.add(pathTwo);
+
+        return finalPaths;
     }
 }

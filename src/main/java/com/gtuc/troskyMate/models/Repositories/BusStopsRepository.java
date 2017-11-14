@@ -29,7 +29,7 @@ public interface BusStopsRepository extends GraphRepository<BusStops>{
     List<BusStops> findBusStopInArea(String areaName);
 
     //Get all bus stops for bus
-    @Query("match (bus:buses), (stop:busStops), (destination:busStops {busStopName:{0}}) where (bus) - [:stopAt] -> (stop) and (bus) - [:stopAt] -> (destination) return stop")
+    @Query("match (bus:buses), (stop:busStops), (destination:busStops {busStopName:{0}}) where (bus) - [:stopAt] -> (stop) and (bus) - [:stopAt] -> (destination) and stop.busStopName <> {0} return stop")
     List<BusStops> findBusStopsConnectedToBusStop(String busStopDestinationName);
 
     @Query("match (stop:busStops) where (:buses{busName:{0}}) - [:stopAt] -> (stop) and (:buses{busName:{1}}) - [:stopAt] -> (stop) return stop")

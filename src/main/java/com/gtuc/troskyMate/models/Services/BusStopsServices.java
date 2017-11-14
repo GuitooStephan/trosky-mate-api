@@ -31,7 +31,7 @@ public class BusStopsServices {
     //Get bus stop in an area
     public List<BusStops> findBusStopInArea(String areaName) {return repositories.findBusStopInArea(areaName);}
 
-    //Get the bus stops for the bus
+    //Get the bus stops for the bus leading to another bus stop
     public List<BusStops> findBusStopsConnectedToBusStop(String busStopDestinationName){ return  repositories.findBusStopsConnectedToBusStop(busStopDestinationName);}
 
     //Get bus that leave a station and stop at a stop
