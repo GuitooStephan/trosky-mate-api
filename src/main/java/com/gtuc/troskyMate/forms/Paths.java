@@ -24,4 +24,6 @@ public class Paths {
     public void setBusStopsList(List<BusStops> busStopsList) {
         this.busStopsList = busStopsList;
     }
+
+    public void addBusStop(BusStops stop){this.busStopsList.add(stop);}
 }
