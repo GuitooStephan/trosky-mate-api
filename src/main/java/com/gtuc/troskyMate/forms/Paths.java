@@ -2,11 +2,15 @@ package com.gtuc.troskyMate.forms;
 
 import com.gtuc.troskyMate.models.Domains.BusStops;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Paths {
 
-    private List<BusStops> busStopsList;
+
+    private List<BusStops> busStopsList = new ArrayList<BusStops>();
+
+    public Paths(BusStops busStop){ this.busStopsList.add(busStop);}
 
     public Paths(int busIndex, List<BusStops> busStopsList){
         this.setBusStopsList(busStopsList);
