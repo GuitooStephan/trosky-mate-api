@@ -16,8 +16,8 @@ public interface BusStopsRepository extends GraphRepository<BusStops>{
     List<BusStops> findAll();
 
     //Query for bus stops
-    @Query("match (stop:busStops) where stop.busStopName={0} return stop")
-    BusStops findBusStop(String busStopName);
+    @Query("match (stop:busStops) where stop.busStopLocation={0} return stop")
+    BusStops findBusStop(String busStopLocation);
 
     @Query("match (bus:buses {busName:{0}}) - [:stopAt] -> (busStop:busStops) return busStop")
     List<BusStops> findBusStopsForBusAndOrder(String busName, Sort sort);
@@ -37,29 +37,29 @@ public interface BusStopsRepository extends GraphRepository<BusStops>{
 
 
     //Get the path between two bus stops
-    @Query("MATCH p=(n:busStops{busStopName:{0}})-[*..2]-(stop:busStops{busStopName:{1}}) RETURN p")
-    List<List<String>> findPathsForOneBus(String busStopOriginName, String busStopDestinationName);
+    @Query("MATCH p=(n:busStops{busStopLocation:{0}})-[*..2]-(stop:busStops{busStopLocation:{1}}) RETURN p")
+    List<List<String>> findPathsForOneBus(String busStopOriginLocation, String busStopDestinationLocation);
 
-    @Query("MATCH p=(n:busStops{busStopName:{0}})-[*..4]-(stop:busStops{busStopName:{1}}) RETURN p")
-    List<List<String>> findPathsForTwoBus(String busStopOriginName, String busStopDestinationName);
+    @Query("MATCH p=(n:busStops{busStopLocation:{0}})-[*..4]-(stop:busStops{busStopLocation:{1}}) RETURN p")
+    List<List<String>> findPathsForTwoBus(String busStopOriginLocation, String busStopDestinationLocation);
 
-    @Query("MATCH p=(n:busStops{busStopName:{0}})-[*..6]-(stop:busStops{busStopName:{1}}) RETURN p")
-    List<List<String>> findPathsForThreeBus(String busStopOriginName, String busStopDestinationName);
+    @Query("MATCH p=(n:busStops{busStopLocation:{0}})-[*..6]-(stop:busStops{busStopLocation:{1}}) RETURN p")
+    List<List<String>> findPathsForThreeBus(String busStopOriginLocation, String busStopDestinationLocation);
 
-    @Query("MATCH p=(n:busStops{busStopName:{0}})-[*..6]-(stop:busStops{busStopName:{1}}) RETURN p")
-    List<List<String>> findPathsForFourBus(String busStopOriginName, String busStopDestinationName);
+    @Query("MATCH p=(n:busStops{busStopLocation:{0}})-[*..6]-(stop:busStops{busStopLocation:{1}}) RETURN p")
+    List<List<String>> findPathsForFourBus(String busStopOriginLocation, String busStopDestinationLocation);
 
 
     //Find the number of paths between two bus stops
-    @Query("MATCH p=(n:busStops{busStopName:{origin}})-[*..2]-(stop:busStops{busStopName:{destination}}) RETURN Count(p)")
-    Integer findNumberOfPathsForOneBus(@Param("origin") String busStopOriginName, @Param("destination") String busStopDestinationName);
+    @Query("MATCH p=(n:busStops{busStopLocation:{origin}})-[*..2]-(stop:busStops{busStopLocation:{destination}}) RETURN Count(p)")
+    Integer findNumberOfPathsForOneBus(@Param("origin") String busStopOriginLocation, @Param("destination") String busStopDestinationLocation);
 
-    @Query("MATCH p=(n:busStops{busStopName:{origin}})-[*..4]-(stop:busStops{busStopName:{destination}}) RETURN Count(p)")
-    Integer findNumberOfPathsForTwoBus(@Param("origin") String busStopOriginName, @Param("destination") String busStopDestinationName);
+    @Query("MATCH p=(n:busStops{busStopLocation:{origin}})-[*..4]-(stop:busStops{busStopLocation:{destination}}) RETURN Count(p)")
+    Integer findNumberOfPathsForTwoBus(@Param("origin") String busStopOriginLocation, @Param("destination") String busStopDestinationLocation);
 
-    @Query("MATCH p=(n:busStops{busStopName:{origin}})-[*..6]-(stop:busStops{busStopName:{destination}}) RETURN Count(p)")
-    Integer findNumberOfPathsForThreeBus(@Param("origin") String busStopOriginName, @Param("destination") String busStopDestinationName);
+    @Query("MATCH p=(n:busStops{busStopLocation:{origin}})-[*..6]-(stop:busStops{busStopLocation:{destination}}) RETURN Count(p)")
+    Integer findNumberOfPathsForThreeBus(@Param("origin") String busStopOriginLocation, @Param("destination") String busStopDestinationLocation);
 
-    @Query("MATCH p=(n:busStops{busStopName:{origin}})-[*..8]-(stop:busStops{busStopName:{destination}}) RETURN Count(p)")
-    Integer findNumberOfPathsForFourBus(@Param("origin") String busStopOriginName, @Param("destination") String busStopDestinationName);
+    @Query("MATCH p=(n:busStops{busStopLocation:{origin}})-[*..8]-(stop:busStops{busStopLocation:{destination}}) RETURN Count(p)")
+    Integer findNumberOfPathsForFourBus(@Param("origin") String busStopOriginLocation, @Param("destination") String busStopDestinationLocation);
 }

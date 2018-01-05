@@ -18,7 +18,7 @@ public class BusStopsServices {
     public List<BusStops> findAll() {return repositories.findAll();}
 
     //Query for a bus Stop
-    public BusStops findBusStop(String busStopName){return repositories.findBusStop(busStopName);}
+    public BusStops findBusStop(String busStopLocation){return repositories.findBusStop(busStopLocation);}
 
 
     //Query all bus stops from origin to destination
@@ -38,16 +38,16 @@ public class BusStopsServices {
     public List<BusStops> findBusStopUsedByTwoBusStops(String busOneName, String busTwoName){return repositories.findBusStopUsedByTwoBusStops(busOneName, busTwoName);}
 
     //Get paths from the origin to destination by radius
-    public List<List<String>> findPaths(String busStopOriginName, String busStopDestinationName, int radius){
+    public List<List<String>> findPaths(String busStopOriginLocation, String busStopDestinationLocation, int radius){
         switch (radius){
             case 2:
-                return repositories.findPathsForOneBus(busStopOriginName, busStopDestinationName);
+                return repositories.findPathsForOneBus(busStopOriginLocation, busStopDestinationLocation);
             case 4:
-                return repositories.findPathsForTwoBus(busStopOriginName, busStopDestinationName);
+                return repositories.findPathsForTwoBus(busStopOriginLocation, busStopDestinationLocation);
             case 6:
-                return repositories.findPathsForThreeBus(busStopOriginName, busStopDestinationName);
+                return repositories.findPathsForThreeBus(busStopOriginLocation, busStopDestinationLocation);
             case 8:
-                return repositories.findPathsForFourBus(busStopOriginName, busStopDestinationName);
+                return repositories.findPathsForFourBus(busStopOriginLocation, busStopDestinationLocation);
             default:
                 return null;
         }
@@ -56,16 +56,16 @@ public class BusStopsServices {
     //Get the number paths between the origin and the destination by the radius
     //1 bus -- 2 radius
     //2 buses -- 4 radius
-    public Integer findNumberOfPathsByRadius(String busStopOriginName, String busStopDestinationName, Integer radius){
+    public Integer findNumberOfPathsByRadius(String busStopOriginLocation, String busStopDestinationLocation, Integer radius){
         switch (radius){
             case 2 :
-                return repositories.findNumberOfPathsForOneBus(busStopOriginName, busStopDestinationName);
+                return repositories.findNumberOfPathsForOneBus(busStopOriginLocation, busStopDestinationLocation);
             case 4:
-                return repositories.findNumberOfPathsForTwoBus(busStopOriginName, busStopDestinationName);
+                return repositories.findNumberOfPathsForTwoBus(busStopOriginLocation, busStopDestinationLocation);
             case 6:
-                return repositories.findNumberOfPathsForThreeBus(busStopOriginName, busStopDestinationName);
+                return repositories.findNumberOfPathsForThreeBus(busStopOriginLocation, busStopDestinationLocation);
             case 8:
-                return repositories.findNumberOfPathsForFourBus(busStopOriginName, busStopDestinationName);
+                return repositories.findNumberOfPathsForFourBus(busStopOriginLocation, busStopDestinationLocation);
             default:
                 return 0;
         }

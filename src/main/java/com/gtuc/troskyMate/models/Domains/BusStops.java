@@ -13,21 +13,26 @@ public class BusStops {
 
     private int busStopId;
 
-    @Index(unique = true)
+
     private String busStopName ;
 
     @Index
     private String [] busStopArea;
 
-
+    //Routes
     private int circleLapazRoute;
 
     private int lapazCircleRoute;
 
     private int circleDomeRoute;
 
-    private int lapazSakumonojunctionRoute;
+    private int circlebyalajoLapazRoute;
 
+    private int adentaLapazRoute;
+
+    private int lapazMadinaRoute;
+
+    @Index(unique = true)
     private String busStopLocation;
 
 
@@ -87,13 +92,6 @@ public class BusStops {
         this.busStopLocation = busStopLocation;
     }
 
-    public int getLapazSakumonojunctionRoute() {
-        return lapazSakumonojunctionRoute;
-    }
-
-    public void setLapazSakumonojunctionRoute(int lapazSakumonojunctionRoute) {
-        this.lapazSakumonojunctionRoute = lapazSakumonojunctionRoute;
-    }
 
     public int getCircleDomeRoute() {
         return circleDomeRoute;
@@ -101,5 +99,29 @@ public class BusStops {
 
     public void setCircleDomeRoute(int circleDomeRoute) {
         this.circleDomeRoute = circleDomeRoute;
+    }
+
+    public int getCirclebyalajoLapazRoute() {
+        return circlebyalajoLapazRoute;
+    }
+
+    public void setCirclebyalajoLapazRoute(int circlebyalajoLapazRoute) {
+        this.circlebyalajoLapazRoute = circlebyalajoLapazRoute;
+    }
+
+    public int getAdentaLapazRoute() {
+        return adentaLapazRoute;
+    }
+
+    public void setAdentaLapazRoute(int adentaLapazRoute) {
+        this.adentaLapazRoute = adentaLapazRoute;
+    }
+
+    public int getLapazMadinaRoute() {
+        return lapazMadinaRoute;
+    }
+
+    public void setLapazMadinaRoute(int lapazMadinaRoute) {
+        this.lapazMadinaRoute = lapazMadinaRoute;
     }
 }

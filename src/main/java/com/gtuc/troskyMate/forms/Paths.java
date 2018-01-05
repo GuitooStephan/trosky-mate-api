@@ -7,16 +7,17 @@ import java.util.List;
 
 public class Paths {
 
+    private int busId;
 
     private List<BusStops> busStopsList = new ArrayList<BusStops>();
 
-    public Paths(BusStops busStop){ this.busStopsList.add(busStop);}
-
-    public Paths(int busIndex, List<BusStops> busStopsList){
-        this.setBusStopsList(busStopsList);
+    public Paths(int id, BusStops busStop){
+        this.busStopsList.add(busStop);
+        this.busId = id;
     }
 
-    public Paths(List<BusStops> busStopsList){
+    public Paths(int id, List<BusStops> busStopsList){
+        this.busId = id;
         this.setBusStopsList(busStopsList);
     }
 
@@ -30,4 +31,12 @@ public class Paths {
     }
 
     public void addBusStop(BusStops stop){this.busStopsList.add(stop);}
+
+    public int getBusId() {
+        return busId;
+    }
+
+    public void setBusId(int busId) {
+        this.busId = busId;
+    }
 }
