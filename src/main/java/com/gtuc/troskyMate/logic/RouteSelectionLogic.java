@@ -53,8 +53,12 @@ public class RouteSelectionLogic {
                 busStopOriginList.add(busStopOriginAndDestination.get(i));
                 i++;
             }
-            //Get the last bus stop for the destination
-            BusStops busStopDestination = busStopOriginAndDestination.get(busStopOriginAndDestination.size() - 1);
+            //Get the 4 stop for the destination
+            List<BusStops> busStopDestinationList = new ArrayList<BusStops>();
+            while (i < 8){
+                busStopDestinationList.add(busStopOriginAndDestination.get(i));
+                i++;
+            }
 
             logger.info("Getting the path between origin and destination");
 
@@ -64,23 +68,35 @@ public class RouteSelectionLogic {
             //Check for each closest bus stop for a path to the destination
             for (BusStops busStopOrigin : busStopOriginList){
 
-                //Radius to determine the number of transitions
-                int radius = 2;
+                for(BusStops busStopDestination : busStopDestinationList){
 
-                //Run While loop until you get one or more paths
-                while ( (busStopsServices.findNumberOfPathsByRadius(busStopOrigin.getBusStopLocation(), busStopDestination.getBusStopLocation(), radius)) < 1 ){
-                    radius = radius + 2;
-                    if (radius >= 10){
-                        break;
-                    }
-                }
+                    //Radius to determine the number of transitions
+                    int radius = 2;
 
-                //Get all paths taking user to his destination
-                if (radius < 10){ //There are paths to the destination
                     //Get the paths
                     pathsObject = busStopsServices.findPaths(busStopOrigin.getBusStopLocation(), busStopDestination.getBusStopLocation(), radius);
+
+                    //Run While loop until you get one or more paths
+                    while ( pathsObject.size() < 1 ){
+                        if (radius >= 8){
+                            break;
+                        }
+
+                        radius = radius + 2;
+
+                        pathsObject = busStopsServices.findPaths(busStopOrigin.getBusStopLocation(), busStopDestination.getBusStopLocation(), radius);
+                    }
+
+                    //Get all paths taking user to his destination
+                    if (pathsObject.size() > 0){ //There are paths to the destination
+                        break;
+                    } //Else try with another bus stop
+                }
+
+                if(pathsObject.size() > 0){
                     break;
-                } //Else try with another bus stop
+                }
+
             }
 
             //In case there is still no paths, end the program
@@ -214,7 +230,7 @@ public class RouteSelectionLogic {
     }
 
     //Find 4 closest bus stop according to neighborhood for one bus trips for origin
-    private List<BusStops> findClosestBusStopForOrigin(String coordinates){
+    private List<BusStops> findClosestBusStop(String coordinates){
         //Variable fo while loop
         int i = 0;
         //Create a list for the 4 closest bus stop
@@ -379,12 +395,12 @@ public class RouteSelectionLogic {
 
         try{
             //Find the bus Stops in the neighborhood 4 for origin and 1 for destination
-            List<BusStops> busStopOrigin = findClosestBusStopForOrigin(coordinatesForOrigin);
-            BusStops busStopDestination = findClosestBusStopForDestination(coordinatesForDestination);
+            List<BusStops> busStopOrigin = findClosestBusStop(coordinatesForOrigin);
+            List<BusStops> busStopDestination = findClosestBusStop(coordinatesForDestination);
 
             //Add the bus stops to the list
             busStops.addAll(busStopOrigin);
-            busStops.add(busStopDestination);
+            busStops.addAll(busStopDestination);
 
 
         } catch(Exception e){
