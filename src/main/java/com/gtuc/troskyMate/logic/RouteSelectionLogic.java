@@ -156,6 +156,7 @@ public class RouteSelectionLogic {
 
         } catch (Exception e){
             logger.error("[ERROR] Sorting Bus stop list");
+            System.out.println(e.getMessage());
             return new ArrayList<BusStops>();
         }
 
@@ -263,6 +264,7 @@ public class RouteSelectionLogic {
 
         } catch (Exception e){
             logger.error("[ERROR] Getting a bus stop in an area");
+            System.out.println(e.getMessage());
         }
         return closestBusStop;
     }
