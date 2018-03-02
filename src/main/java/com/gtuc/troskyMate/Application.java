@@ -22,9 +22,8 @@ public class Application {
         org.neo4j.ogm.config.Configuration config = new org.neo4j.ogm.config.Configuration();
         config
                 .driverConfiguration()
-                .setDriverClassName("org.neo4j.ogm.drivers.bolt.driver.BoltDriver")
-                .setURI("bolt://hobby-cjkoaoiekhacgbkeoemilpal.dbs.graphenedb.com:24786")
-                .setCredentials("app89205062-DQZv67", "b.i3LyH7FqZV2T.OyCIVvSXTXvaNon6");
+                .setDriverClassName("org.neo4j.ogm.drivers.http.driver.HttpDriver")
+                .setURI("https://app89205062-DQZv67:b.i3LyH7FqZV2T.OyCIVvSXTXvaNon6@hobby-cjkoaoiekhacgbkeoemilpal.dbs.graphenedb.com:24780");
         return config;
     }
 

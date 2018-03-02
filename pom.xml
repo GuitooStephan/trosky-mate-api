@@ -56,9 +56,14 @@
             <version>2.8.0</version>
         </dependency>
         <dependency>
+            <groupId>org.neo4j</groupId>
+            <artifactId>neo4j-ogm</artifactId>
+            <version>${neo4j-ogm.version}</version>
+        </dependency>
+        <dependency>
             <scope>runtime</scope>
             <groupId>org.neo4j</groupId>
-            <artifactId>neo4j-ogm-bolt-driver</artifactId>
+            <artifactId>neo4j-ogm-http-driver</artifactId>
             <version>${neo4j-ogm.version}</version>
         </dependency>
     </dependencies>
