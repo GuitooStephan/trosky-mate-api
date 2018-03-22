@@ -46,7 +46,7 @@ public interface BusStopsRepository extends GraphRepository<BusStops>{
     @Query("MATCH p=(n:busStops{busStopLocation:{0}})-[*..6]-(stop:busStops{busStopLocation:{1}}) RETURN p")
     List<List<String>> findPathsForThreeBus(String busStopOriginLocation, String busStopDestinationLocation);
 
-    @Query("MATCH p=(n:busStops{busStopLocation:{0}})-[*..8]-(stop:busStops{busStopLocation:{1}}) RETURN p")
+    @Query("MATCH p=(n:busStops{busStopLocation:{0}})-[*..8 ]-(stop:busStops{busStopLocation:{1}}) RETURN p")
     List<List<String>> findPathsForFourBus(String busStopOriginLocation, String busStopDestinationLocation);
 
 

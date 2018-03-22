@@ -9,8 +9,6 @@ import org.neo4j.ogm.annotation.NodeEntity;
 public class Buses {
     @GraphId
     Long id;
-    @Index(unique = true)
-    private Long busId ;
 
     @Index(unique = true)
     private String busName;
@@ -28,13 +26,6 @@ public class Buses {
 //    Set<Buses> stopAt = new HashSet<Buses>();
 
 
-    public Long getBusId() {
-        return busId;
-    }
-
-    public void setBusId(Long busId) {
-        this.busId = busId;
-    }
 
     public String getBusName() {
         return busName;

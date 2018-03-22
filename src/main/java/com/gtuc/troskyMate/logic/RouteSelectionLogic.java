@@ -40,23 +40,19 @@ public class RouteSelectionLogic {
         JSONResponse response = new JSONResponse();
 
         try{
-            logger.info("[INFO] Associating the location and the destinations to bus stops");
-            // Get 4 bus stops for the origin and 1 bus stop for destination coordinates
-            List<BusStops> busStopOriginAndDestination = getClosestBusStop(origin,destination);
+            logger.info("[INFO] Associating the location of the destination and origin to bus stops");
+            // Get 4 bus stops for the destination and the origin bus stop
+            List<BusStops> closestBusStopDestinationList = getClosestBusStop(destination);
+            BusStops busStopOrigin = getOriginBusStop(origin);
 
-            logger.info("[INFO] Getting the bus stop for both origin and destination");
+            logger.info("[INFO] Getting the bus stop for destination");
             //Get bus stops
             int i = 0;
-            //Get the 4 closest bus stops for origin
-            List<BusStops> busStopOriginList = new ArrayList<BusStops>();
-            while (i < 4){
-                busStopOriginList.add(busStopOriginAndDestination.get(i));
-                i++;
-            }
             //Get the 4 stop for the destination
             List<BusStops> busStopDestinationList = new ArrayList<BusStops>();
-            while (i < 8){
-                busStopDestinationList.add(busStopOriginAndDestination.get(i));
+            while (i < 4){
+                busStopDestinationList.add(closestBusStopDestinationList.get(i));
+                logger.info(closestBusStopDestinationList.get(i).getBusStopLocation());
                 i++;
             }
 
@@ -66,51 +62,50 @@ public class RouteSelectionLogic {
             List<List<String>> pathsObject = new ArrayList<List<String>>();
 
             //Check for each closest bus stop for a path to the destination
-            for (BusStops busStopOrigin : busStopOriginList){
+            for(BusStops busStopDestination : busStopDestinationList){
 
-                for(BusStops busStopDestination : busStopDestinationList){
+                //Radius to determine the number of transitions
+                int radius = 2;
+                boolean keepTrying = true;
 
-                    //Radius to determine the number of transitions
-                    int radius = 2;
+                //Get the paths
+                pathsObject = busStopsServices.findPaths(busStopOrigin.getBusStopLocation(), busStopDestination.getBusStopLocation(), radius);
 
-                    //Get the paths
-                    pathsObject = busStopsServices.findPaths(busStopOrigin.getBusStopLocation(), busStopDestination.getBusStopLocation(), radius);
-
-                    //Run While loop until you get one or more paths
-                    while ( pathsObject.size() < 1 ){
-                        if (radius >= 8){
-                            break;
-                        }
-
-                        radius = radius + 2;
-
-                        pathsObject = busStopsServices.findPaths(busStopOrigin.getBusStopLocation(), busStopDestination.getBusStopLocation(), radius);
+                //Run While loop until you get one or more paths
+                while ( keepTrying ){
+                    if (radius >= 8){
+                        break;
                     }
 
-                    //Get all paths taking user to his destination
-                    if (pathsObject.size() > 0){ //There are paths to the destination
-                        break;
-                    } //Else try with another bus stop
+                    radius = radius + 2;
+
+                    pathsObject = busStopsServices.findPaths(busStopOrigin.getBusStopLocation(), busStopDestination.getBusStopLocation(), radius);
+                    pathsObject = filterPathsForCorrectOnes(pathsObject);
+
+                    if(pathsObject.size() > 0){
+                        keepTrying = false;
+                    }
                 }
 
-                if(pathsObject.size() > 0){
+                //Get all paths taking user to his destination
+                if (pathsObject.size() > 0){ //There are paths to the destination
                     break;
-                }
-
+                } //Else try with another bus stop
             }
 
+            logger.info("[INFO] Getting the path ");
             //In case there is still no paths, end the program
             if(pathsObject.size() == 0){
                 return displayNoBusFound(response);
             }
 
             //Getting the correct paths with the correct buses
-            pathsObject = filterPathsForCorrectOnes(pathsObject);
+//            pathsObject = filterPathsForCorrectOnes(pathsObject);
 
             //In case there is still no appropriate paths, end the program
-            if(pathsObject.size() == 0){
-                return displayNoBusFound(response);
-            }
+//            if(pathsObject.size() == 0){
+//                return displayNoBusFound(response);
+//            }
 
             logger.info("[INFO] Getting shortest path");
             //Getting the shortest path to take
@@ -128,38 +123,6 @@ public class RouteSelectionLogic {
         }
 
         return response;
-    }
-
-
-    //Sort a list of Bus stop to determine which one is closer to a coordinate
-    private List<BusStops> sortBusStopsList(List<BusStops> busStopsList, String coordinates){
-        try{
-            List<BusStops> sortedBusStopList = new ArrayList<BusStops>();
-
-            //Get the distance between the coordinates and each bus origin
-            List<Integer> listDistance = new ArrayList<Integer>();
-            for (BusStops busStops : busStopsList ){
-                listDistance.add(distance(coordinates, busStops.getBusStopLocation()));
-            }
-
-            //Sort out the list of distance
-            List<Integer> sortListDistance = quicksort(listDistance);
-
-            //Fill the list to return
-            int indexOfClosestBusStop ;
-            for (int i = 0; i < sortListDistance.size(); i++){
-                indexOfClosestBusStop = listDistance.indexOf(sortListDistance.get(i));
-                sortedBusStopList.add(busStopsList.get(indexOfClosestBusStop));
-            }
-
-            return sortedBusStopList;
-
-        } catch (Exception e){
-            logger.error("[ERROR] Sorting Bus stop list");
-            System.out.println(e.getMessage());
-            return new ArrayList<BusStops>();
-        }
-
     }
 
     //Get the bus stops in a 100 - 500 m radius of a specific bus stop
@@ -263,36 +226,9 @@ public class RouteSelectionLogic {
 
 
         } catch (Exception e){
-            logger.error("[ERROR] Getting a bus stop in an area");
+            logger.error("[ERROR] Getting close bus stops");
             System.out.println(e.getMessage());
         }
-        return closestBusStop;
-    }
-
-    //Find closest bus stop for destination
-    private BusStops findClosestBusStopForDestination(String coordinates){
-        List<BusStops> busStopsList = busStopsServices.findAll();
-        BusStops closestBusStop = new BusStops();
-
-        try{
-
-            //Get the distance between the coordinates and each bus stops
-            List<Integer> listDistance = new ArrayList<Integer>();
-            for (BusStops busStops : busStopsList ){
-                listDistance.add(distance(coordinates, busStops.getBusStopLocation()));
-            }
-
-            //Sort out the list of distance
-            List<Integer> sortListDistance = quicksort(listDistance);
-
-            //Get the closest bus stop index
-            int indexOfClosestBusStop = listDistance.indexOf(sortListDistance.get(0));
-
-            closestBusStop = busStopsList.get(indexOfClosestBusStop);
-        } catch (Exception e){
-            logger.error("[ERROR] Getting a bus stop in an area");
-        }
-
         return closestBusStop;
     }
 
@@ -391,17 +327,15 @@ public class RouteSelectionLogic {
         return response;
     }
 
-    //Associate coordinates to the bus stop for the origin and the destination
-    private List<BusStops> getClosestBusStop(String coordinatesForOrigin, String coordinatesForDestination){
+    //Associate coordinates to the bus stop for the destination
+    private List<BusStops> getClosestBusStop(String coordinatesForDestination){
         List<BusStops> busStops = new ArrayList<BusStops>();
 
         try{
-            //Find the bus Stops in the neighborhood 4 for origin and 1 for destination
-            List<BusStops> busStopOrigin = findClosestBusStop(coordinatesForOrigin);
+            //Find the bus Stops 4 for destination
             List<BusStops> busStopDestination = findClosestBusStop(coordinatesForDestination);
 
             //Add the bus stops to the list
-            busStops.addAll(busStopOrigin);
             busStops.addAll(busStopDestination);
 
 
@@ -410,6 +344,15 @@ public class RouteSelectionLogic {
         }
 
         return busStops;
+    }
+
+    //Getting the origin information
+    private BusStops getOriginBusStop(String coordinatesForOrigin){
+        BusStops busStopOrigin = new BusStops();
+
+        busStopOrigin = busStopsServices.findBusStop(coordinatesForOrigin);
+
+        return busStopOrigin;
     }
 
     //Get the buses that passes from the first parameter then to the second parameter
