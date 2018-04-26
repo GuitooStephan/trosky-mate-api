@@ -13,12 +13,6 @@ public class Buses {
     @Index(unique = true)
     private String busName;
 
-    @Index
-    private String busOrigin;
-
-    @Index
-    private String busDestination;
-
 //    @Relationship(type="hasBus", direction = "INCOMING")
 //    Set<Buses> hasBus = new HashSet<Buses>();
 //
@@ -33,22 +27,6 @@ public class Buses {
 
     public void setBusName(String busName) {
         this.busName = busName;
-    }
-
-    public String getBusOrigin() {
-        return busOrigin;
-    }
-
-    public void setBusOrigin(String busOrigin) {
-        this.busOrigin = busOrigin;
-    }
-
-    public String getBusDestination() {
-        return busDestination;
-    }
-
-    public void setBusDestination(String busDestination) {
-        this.busDestination = busDestination;
     }
 
     public Long getId() {

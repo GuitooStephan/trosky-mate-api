@@ -201,8 +201,11 @@ public class RouteSelectionLogic {
         List<BusStops> closestBusStop = new ArrayList<BusStops>();
 
         try{
+
+            logger.info("[INFO] Requesting all bus stops");
             List<BusStops> busStopsList = busStopsServices.findAll();
 
+            logger.info("[INFO] Calculating Distance");
             //Get the distance between the coordinates and each bus stops
             List<Integer> listDistance = new ArrayList<Integer>();
             for (BusStops busStops : busStopsList ){
