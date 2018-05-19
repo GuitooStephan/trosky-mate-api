@@ -65,19 +65,16 @@ public class RouteSelectionLogic {
             for(BusStops busStopDestination : busStopDestinationList){
 
                 //Radius to determine the number of transitions
-                int radius = 2;
+                int radius = 0;
                 boolean keepTrying = true;
-
-                //Get the paths
-                pathsObject = busStopsServices.findPaths(busStopOrigin.getBusStopLocation(), busStopDestination.getBusStopLocation(), radius);
 
                 //Run While loop until you get one or more paths
                 while ( keepTrying ){
-                    if (radius >= 8){
+                    if (radius >= 6){
                         break;
                     }
 
-                    radius = radius + 2;
+                    radius = radius + 1;
 
                     pathsObject = busStopsServices.findPaths(busStopOrigin.getBusStopLocation(), busStopDestination.getBusStopLocation(), radius);
                     pathsObject = filterPathsForCorrectOnes(pathsObject);

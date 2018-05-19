@@ -40,14 +40,18 @@ public class BusStopsServices {
     //Get paths from the origin to destination by radius
     public List<List<String>> findPaths(String busStopOriginLocation, String busStopDestinationLocation, int radius){
         switch (radius){
+            case 1:
+                return repositories.findPathsForOneStop(busStopOriginLocation, busStopDestinationLocation);
             case 2:
-                return repositories.findPathsForOneBus(busStopOriginLocation, busStopDestinationLocation);
+                return repositories.findPathsForTwoStop(busStopOriginLocation, busStopDestinationLocation);
+            case 3:
+                return repositories.findPathsForThreeStop(busStopOriginLocation, busStopDestinationLocation);
             case 4:
-                return repositories.findPathsForTwoBus(busStopOriginLocation, busStopDestinationLocation);
+                return repositories.findPathsForFourStop(busStopOriginLocation, busStopDestinationLocation);
+            case 5:
+                return repositories.findPathsForFiveStop(busStopOriginLocation, busStopDestinationLocation);
             case 6:
-                return repositories.findPathsForThreeBus(busStopOriginLocation, busStopDestinationLocation);
-            case 8:
-                return repositories.findPathsForFourBus(busStopOriginLocation, busStopDestinationLocation);
+                return repositories.findPathsForSixStop(busStopOriginLocation, busStopDestinationLocation);
             default:
                 return null;
         }
@@ -59,7 +63,7 @@ public class BusStopsServices {
     public Integer findNumberOfPathsByRadius(String busStopOriginLocation, String busStopDestinationLocation, Integer radius){
         switch (radius){
             case 2 :
-                return repositories.findNumberOfPathsForOneBus(busStopOriginLocation, busStopDestinationLocation);
+                return repositories.findNumberOfPathsForOneStop(busStopOriginLocation, busStopDestinationLocation);
             case 4:
                 return repositories.findNumberOfPathsForTwoBus(busStopOriginLocation, busStopDestinationLocation);
             case 6:
