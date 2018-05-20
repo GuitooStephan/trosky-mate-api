@@ -13,6 +13,9 @@ public class Buses {
     @Index(unique = true)
     private String busName;
 
+    @Index(unique= true)
+    private String busDestination;
+
 //    @Relationship(type="hasBus", direction = "INCOMING")
 //    Set<Buses> hasBus = new HashSet<Buses>();
 //
@@ -35,5 +38,13 @@ public class Buses {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getBusDestination() {
+        return busDestination;
+    }
+
+    public void setBusDestination(String busDestination) {
+        this.busDestination = busDestination;
     }
 }

@@ -122,72 +122,11 @@ public class RouteSelectionLogic {
         return response;
     }
 
-    //Get the bus stops in a 100 - 500 m radius of a specific bus stop
-    private List<BusStops> getClosestBusStopsToCoordinates(List<BusStops> listOfBusOrigins, String originCoordinates){
-
-        List<BusStops> closestStops = new ArrayList<BusStops>();
-
-        try{
-
-            //Get the distance between the coordinates and each bus origin
-            List<Integer> listDistance = new ArrayList<Integer>();
-
-            for (BusStops busStops : listOfBusOrigins ){
-                listDistance.add(distance(originCoordinates, busStops.getBusStopLocation()));
-            }
-
-            //Sort out the list of distance
-            List<Integer> sortListDistance = quicksort(listDistance);
-
-            for (int i=0; i < sortListDistance.size(); i++){
-                //Get the closest bus stop
-                int indexOfClosestBusStop = listDistance.indexOf(sortListDistance.get(i));
-                if(sortListDistance.get(i) <= 400 && sortListDistance.get(i) >= 100) closestStops.add(listOfBusOrigins.get(indexOfClosestBusStop));
-            }
-
-            return closestStops;
-
-        } catch (Exception e){
-            logger.error("[ERROR] Getting closest bus station");
-        }
-
-        return closestStops;
-    }
-
     //Split bus name for route
     private String splitBusNameForRoute(String busName){
         String [] busNameParts = busName.split("-", 2);
 
         return busNameParts[0].toLowerCase() + busNameParts[1] + "Route";
-    }
-
-    //Get Position of a bus stop on a route
-    private int getPositionOnRoute(BusStops busStops, String route){
-        JSONObject obj = new JSONObject(busStops);
-
-        return obj.getInt(route);
-    }
-
-    //Get the neighborhood of a coordinates by geocode
-    private String getLocationOfCoordinates(String url){
-
-        try{
-            //Create a rest template
-            RestTemplate restTemplate = new RestTemplate();
-
-            //Get the result
-            String response = restTemplate.getForObject(url, String.class);
-
-            //Getting the information
-            JSONObject obj = new JSONObject(response);
-            JSONArray results = obj.getJSONArray("results");
-            JSONObject addressComponentsObject = results.getJSONObject(0);
-            JSONArray addressComponents = addressComponentsObject.getJSONArray("address_components");
-            JSONObject infoObject = addressComponents.getJSONObject(0);
-            return infoObject.getString("long_name");
-        } catch (Exception e){
-            return "Accra";
-        }
     }
 
     //Find 4 closest bus stop according to neighborhood for one bus trips for origin
@@ -353,28 +292,6 @@ public class RouteSelectionLogic {
         busStopOrigin = busStopsServices.findBusStop(coordinatesForOrigin);
 
         return busStopOrigin;
-    }
-
-    //Get the buses that passes from the first parameter then to the second parameter
-    private Buses getRequestBuses(BusStops busStopOrigin, BusStops busStopDestination){
-
-        Buses myBus = new Buses();
-        //Find bus which stop at the two bus stops
-        List<Buses> busesList = busesServices.findBusStopingAtTwoBusStops(busStopOrigin.getBusStopName(), busStopDestination.getBusStopName());
-        for (Buses bus : busesList){
-            //Get the route of the bus
-            String route = splitBusNameForRoute(bus.getBusName());
-
-            int routePositionOfOrigin = getPositionOnRoute(busStopOrigin, route);
-            int routePositionOfDestination = getPositionOnRoute(busStopDestination, route);
-
-            //If the origin comes before the destination then user can use this bus
-            if(routePositionOfOrigin < routePositionOfDestination){
-                return bus;
-            }
-        }
-
-        return myBus;
     }
 
     //Go through the paths and identify the correct ones
@@ -570,25 +487,5 @@ public class RouteSelectionLogic {
             }
         }
         return radius;
-    }
-
-    //Check if there is a correct path between two stops
-    private Boolean getRightPath(String busStopOne, String busStopTwo){
-        try{
-            if (busStopOne.equals(busStopTwo)){
-                return true;
-            }
-
-            List<List<String>> pathsObject = busStopsServices.findPaths(busStopOne, busStopTwo, radiusForPath(busStopOne, busStopTwo));
-
-
-            if (filterPathsForCorrectOnes(pathsObject).size() >= 1){
-                return true;
-            } else return false;
-
-        } catch (Exception e){
-            return false;
-        }
-
     }
 }
