@@ -96,14 +96,6 @@ public class RouteSelectionLogic {
                 return displayNoBusFound(response);
             }
 
-            //Getting the correct paths with the correct buses
-//            pathsObject = filterPathsForCorrectOnes(pathsObject);
-
-            //In case there is still no appropriate paths, end the program
-//            if(pathsObject.size() == 0){
-//                return displayNoBusFound(response);
-//            }
-
             logger.info("[INFO] Getting shortest path");
             //Getting the shortest path to take
             List<String> path = getShortestPath(pathsObject);

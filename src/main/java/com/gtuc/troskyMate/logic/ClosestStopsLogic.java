@@ -92,13 +92,41 @@ public class ClosestStopsLogic {
             //Sort out the list of distance
             List<Integer> sortListDistance = quicksort(listDistance);
 
+            //Boolean to check if a bus stop with a similar name was in the list
+            Boolean isSimilar = false;
+
             //Get the four closest bus stops
-            while (i < 4 ){
+            while (i < 8 ){
                 //Get the closest bus stop index
                 int indexOfClosestBusStop = listDistance.indexOf(sortListDistance.get(i));
 
-                //Add the closest bus stop to the list
-                closestBusStop.add(busStopsList.get(indexOfClosestBusStop));
+                //Check if a bus stop with a similar name was added before after a bus stop was added in the list
+                if (i > 0){
+
+                    //Check in the list of closest bus stops
+                    for (BusStops busStop : closestBusStop){
+                        if(busStop.getBusStopName().equalsIgnoreCase(busStopsList.get(indexOfClosestBusStop).getBusStopName())){
+                            isSimilar = true;
+                        }
+                    }
+
+                    //If isSimilar = true then there is a bus stop with the similar name else add it to the list
+                    if(!isSimilar){
+                        //Add the closest bus stop to the list
+                        closestBusStop.add(busStopsList.get(indexOfClosestBusStop));
+                    }
+
+                    //Set boolean to false
+                    isSimilar = false;
+                } else {
+                    //Add the closest bus stop to the list
+                    closestBusStop.add(busStopsList.get(indexOfClosestBusStop));
+                }
+
+                //Break the while loop if the list has four bus stops
+                if(closestBusStop.size() == 4){
+                    break;
+                }
 
                 //increase i
                 i++;
