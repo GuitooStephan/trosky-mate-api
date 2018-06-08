@@ -17,15 +17,15 @@ import org.springframework.context.annotation.Configuration;
 
 public class Application {
 
-    @Bean
-    public org.neo4j.ogm.config.Configuration getConfiguration() {
-        org.neo4j.ogm.config.Configuration config = new org.neo4j.ogm.config.Configuration();
-        config
-                .driverConfiguration()
-                .setDriverClassName("org.neo4j.ogm.drivers.http.driver.HttpDriver")
-                .setURI("https://app89205062-hk0rQb:b.GtlwgQLjjhwS.4120e0RAh9NHPybU@hobby-aobgbehadkjfgbkeefmehgbl.dbs.graphenedb.com:24780");
-        return config;
-    }
+//    @Bean
+//    public org.neo4j.ogm.config.Configuration getConfiguration() {
+//        org.neo4j.ogm.config.Configuration config = new org.neo4j.ogm.config.Configuration();
+//        config
+//                .driverConfiguration()
+//                .setDriverClassName("org.neo4j.ogm.drivers.http.driver.HttpDriver")
+//                .setURI("https://app89205062-hk0rQb:b.GtlwgQLjjhwS.4120e0RAh9NHPybU@hobby-aobgbehadkjfgbkeefmehgbl.dbs.graphenedb.com:24780");
+//        return config;
+//    }
 
     //Main function of troskyMate
     public static void main(String[] args) throws Exception{

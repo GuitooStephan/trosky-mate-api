@@ -12,6 +12,7 @@ public class JSONResponse {
     private String message;
     private List<Buses> buses = new ArrayList<Buses>();
     private List<Paths> paths = new ArrayList<Paths>();
+    private List<Options> options = new ArrayList<Options>();
 
 
     public int getStatus() {
@@ -42,11 +43,23 @@ public class JSONResponse {
         return paths;
     }
 
-    public void setPaths(List<Paths> paths) {
-        this.paths = paths;
-    }
-
     public void setPaths(Paths paths) {
         this.paths.add(paths);
+    }
+
+    public List<Options> getOptions() {
+        return options;
+    }
+
+    public void setOptions(Options option) {
+        this.options.add(option);
+    }
+
+    public Integer numberOfBuses(){
+        return this.buses.size();
+    }
+
+    public Integer numberOfPaths(){
+        return this.paths.size();
     }
 }

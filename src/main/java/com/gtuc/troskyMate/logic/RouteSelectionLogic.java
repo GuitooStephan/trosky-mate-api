@@ -2,9 +2,9 @@ package com.gtuc.troskyMate.logic;
 
 
 import com.gtuc.troskyMate.forms.JSONResponse;
+import com.gtuc.troskyMate.forms.Options;
 import com.gtuc.troskyMate.forms.Paths;
 import com.gtuc.troskyMate.models.Domains.BusStops;
-import com.gtuc.troskyMate.models.Domains.Buses;
 import com.gtuc.troskyMate.models.Services.BusStopsServices;
 import com.gtuc.troskyMate.models.Services.BusesServices;
 import com.gtuc.troskyMate.utils.APIKeys;
@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,7 +75,10 @@ public class RouteSelectionLogic {
 
                     radius = radius + 1;
 
+                    //Finding paths between bus stops
                     pathsObject = busStopsServices.findPaths(busStopOrigin.getBusStopLocation(), busStopDestination.getBusStopLocation(), radius);
+
+                    //Getting the correct ones
                     pathsObject = filterPathsForCorrectOnes(pathsObject);
 
                     if(pathsObject.size() > 0){
@@ -101,7 +103,7 @@ public class RouteSelectionLogic {
             List<String> path = getShortestPath(pathsObject);
 
             logger.info("[INFO] Setting response");
-            response = setResponse(response , path);
+            response = setBusesAndPaths(response , path, pathsObject);
 
         }catch (Exception e){
             logger.info(e.toString());
@@ -378,16 +380,18 @@ public class RouteSelectionLogic {
         return busNames;
     }
 
-    //Set a response
-    private JSONResponse setResponse(JSONResponse response, List<String> path){
+    //Set the buses and the paths
+    private JSONResponse setBusesAndPaths(JSONResponse response, List<String> path, List<List<String>> pathObject){
 
         try {
 
-            //Get Buses in path
+            //Get Buses in response
             List<String> busNames = getBusesOnPath(path);
             for (String busName : busNames){
                 response.setBuses(busesServices.findBus(busName));
             }
+
+            int positionOfOptions = 0;
 
             //Get BusStops in path
             //Set the bus id
@@ -400,6 +404,7 @@ public class RouteSelectionLogic {
                 //Whenever you land on a bus
                 if (pathSegments.has("busName")) {
                     id++;
+                    positionOfOptions++;
 
                     //Get his route
                     String route = splitBusNameForRoute(pathSegments.getString("busName"));
@@ -416,6 +421,13 @@ public class RouteSelectionLogic {
 
                     //Insert paths in response
                     response.setPaths(paths);
+
+                    //Set the other options for this bus
+                    Options option = setOptionsForBus(response.numberOfPaths(), positionOfOptions, pathObject);
+
+                    //Insert options in the response
+                    response.setOptions(option);
+
                 } else if(pathSegments.has("busStopName")){
                     if(i >= 2){
                         JSONObject closeByBusStop = objs.getJSONObject(i-2);
@@ -439,6 +451,44 @@ public class RouteSelectionLogic {
             response.setMessage("No Bus Found");
             return response;
         }
+    }
+
+    //Set options for a bus
+    private Options setOptionsForBus(int pathId, int positionOfOption, List<List<String>> pathObject){
+        //Set new options
+        Options option = new Options();
+
+        int indexOfBusName = 0;
+
+        //Set the path ID
+        option.setPathId(pathId);
+
+        //Set the bus in the options
+        //Loop thru the paths
+        for (List<String> path : pathObject){
+            indexOfBusName = 1;
+
+            //Create an array
+            JSONArray obj = new JSONArray(path);
+
+            //Loop thru the elements in the array
+            for(int i = 0; i < obj.length() ; i++){
+
+                JSONObject pathSegments = obj.getJSONObject(i);
+
+                if (pathSegments.has("busName")){
+                    if(indexOfBusName == positionOfOption){
+                        option.addOtherBuses(busesServices.findBus(pathSegments.getString("busName")));
+                        break;
+                    }
+                    indexOfBusName++;
+                }
+            }
+
+        }
+
+        return option;
+
     }
 
     //Get the bus stops for the request
@@ -467,17 +517,5 @@ public class RouteSelectionLogic {
         }
 
         return listOfBusStopsForPath;
-    }
-
-    //Returned the radius required to get a path from one stop to the other
-    private int radiusForPath(String busStopOne, String busStopTwo){
-        int radius = 2;
-        while ( (busStopsServices.findNumberOfPathsByRadius(busStopOne, busStopTwo, radius)) < 1 ){
-            radius = radius + 2;
-            if (radius > 8){
-                return 0;
-            }
-        }
-        return radius;
     }
 }

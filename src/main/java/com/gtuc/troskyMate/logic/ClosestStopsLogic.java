@@ -72,7 +72,6 @@ public class ClosestStopsLogic {
         return busStops;
     }
 
-
     //Finding the 4 closest bus stops
     private List<BusStops> findClosestBusStop(String coordinates){
         //Variable fo while loop
