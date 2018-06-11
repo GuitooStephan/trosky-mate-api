@@ -102,6 +102,7 @@ public class RouteSelectionLogic {
             //Getting the shortest path to take
             List<String> path = getShortestPath(pathsObject);
 
+
             logger.info("[INFO] Setting response");
             response = setBusesAndPaths(response , path, pathsObject);
 
