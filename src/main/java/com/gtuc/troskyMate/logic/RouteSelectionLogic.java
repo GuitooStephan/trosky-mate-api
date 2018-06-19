@@ -332,22 +332,32 @@ public class RouteSelectionLogic {
     }
 
     //Get the shortest path
+    //It select the first bus and find the path in which the bus stop the user is to
+    //alight to first has the smallest position in the route of bus
     private List<String> getShortestPath(List<List<String>> paths){
 
+        //Create a list for finding the closest ne bus stop
         List<Integer> distanceBetweenOriginAndFirstTransitStopList = new ArrayList<Integer>();
 
+        //Loop through the correct paths
         for (List<String> path : paths){
             JSONArray objs = new JSONArray(path);
 
+            //Loop through each path
             for (int i = 0; i < objs.length(); i++){
 
                 JSONObject pathSegments = objs.getJSONObject(i);
 
+                //For the first bus
                 if (pathSegments.has("busName")) {
+
+                    //Find the route for the bus
                     String route = splitBusNameForRoute(pathSegments.getString("busName"));
 
+                    //Find the bus stop, the user is supposed to alight to
                     JSONObject destinationBusStop = objs.getJSONObject(i + 2);
 
+                    //Find the position of the bus stop in the bus route then store it in the list
                     distanceBetweenOriginAndFirstTransitStopList.add(destinationBusStop.getInt(route));
 
                     break;
@@ -355,8 +365,10 @@ public class RouteSelectionLogic {
             }
         }
 
+        //Sort the list
         List<Integer> listOfShortestDistance = quicksort(distanceBetweenOriginAndFirstTransitStopList);
 
+        //Get the index of the path in which the user will get down faster
         int shortestRouteIndex = distanceBetweenOriginAndFirstTransitStopList.indexOf(listOfShortestDistance.get(0));
 
         return paths.get(shortestRouteIndex);
