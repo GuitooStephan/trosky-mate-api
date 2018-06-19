@@ -23,7 +23,7 @@ public class Application {
         config
                 .driverConfiguration()
                 .setDriverClassName("org.neo4j.ogm.drivers.http.driver.HttpDriver")
-                .setURI("https://app89205062-hk0rQb:b.GtlwgQLjjhwS.4120e0RAh9NHPybU@hobby-aobgbehadkjfgbkeefmehgbl.dbs.graphenedb.com:24780");
+                .setURI("https://app100159965-cRYnoy:b.tdmWObaeLiKB.MUvN8vQ4MSQKIFRR@hobby-cfmlcgoegikmgbkefnjipibl.dbs.graphenedb.com:24780");
         return config;
     }
 
