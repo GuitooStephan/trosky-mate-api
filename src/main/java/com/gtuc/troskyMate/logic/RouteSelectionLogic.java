@@ -57,40 +57,24 @@ public class RouteSelectionLogic {
 
             logger.info("Getting the path between origin and destination");
 
+            //Find out to which destination bus stop, does the user makes fewer stops
+//          and the number of stops
+            List<Integer> results = getEasyReachDestinationBusStop(busStopDestinationList, busStopOrigin);
+
             //Initialize a path object for all the paths between origin and destination
             List<List<String>> pathsObject = new ArrayList<List<String>>();
 
-            //Check for each closest bus stop for a path to the destination
-            for(BusStops busStopDestination : busStopDestinationList){
+            //Get the best destination stop
+            BusStops destinationStop = busStopDestinationList.get(results.get(0));
 
-                //Radius to determine the number of transitions
-                int radius = 0;
-                boolean keepTrying = true;
+            //Get the number of stops
+            int numberOfStops = results.get(1);
 
-                //Run While loop until you get one or more paths
-                while ( keepTrying ){
-                    if (radius >= 6){
-                        break;
-                    }
+            //Finding paths between bus stops
+            pathsObject = busStopsServices.findPaths(busStopOrigin.getBusStopLocation(), destinationStop.getBusStopLocation(), numberOfStops);
 
-                    radius = radius + 1;
-
-                    //Finding paths between bus stops
-                    pathsObject = busStopsServices.findPaths(busStopOrigin.getBusStopLocation(), busStopDestination.getBusStopLocation(), radius);
-
-                    //Getting the correct ones
-                    pathsObject = filterPathsForCorrectOnes(pathsObject);
-
-                    if(pathsObject.size() > 0){
-                        keepTrying = false;
-                    }
-                }
-
-                //Get all paths taking user to his destination
-                if (pathsObject.size() > 0){ //There are paths to the destination
-                    break;
-                } //Else try with another bus stop
-            }
+            //Getting the correct ones
+            pathsObject = filterPathsForCorrectOnes(pathsObject);
 
             logger.info("[INFO] Getting the path ");
             //In case there is still no paths, end the program
@@ -530,5 +514,57 @@ public class RouteSelectionLogic {
         }
 
         return listOfBusStopsForPath;
+    }
+
+    //Find out to which of the destination bus stop, does the user makes fewer stops and how many stops the user is to make
+    private List<Integer> getEasyReachDestinationBusStop(List<BusStops> destinationStops, BusStops origin){
+        //Initialize a list for the index of the best destination bus stop and the number of stops
+        List<Integer> results = new ArrayList<Integer>();
+
+        //Initialize a path object for all the paths between origin and destination
+        List<List<String>> pathsObject = new ArrayList<List<String>>();
+
+        //List to keep track of the number of stops required for each destination stop
+        List<Integer> numberOfStopsForDestinationStops = new ArrayList<Integer>();
+
+        //For each destination bus stop, check if how many stops do we need to get there
+        for(BusStops busStopDestination : destinationStops){
+
+            //Radius to determine the number of stops
+            int numberOfStops = 0;
+
+            //Run While loop until the number of stops is more than 6 or you have found the number of
+//          stop required
+            while ( true ){
+                if (numberOfStops >= 6){
+                    numberOfStopsForDestinationStops.add(10);
+                    break;
+                }
+
+                numberOfStops = numberOfStops + 1;
+
+                //Finding paths between bus stops
+                pathsObject = busStopsServices.findPaths(origin.getBusStopLocation(), busStopDestination.getBusStopLocation(), numberOfStops);
+
+                //Getting the correct ones
+                pathsObject = filterPathsForCorrectOnes(pathsObject);
+
+                if(pathsObject.size() > 0){
+                    numberOfStopsForDestinationStops.add(numberOfStops);
+                    break;
+                }
+            }
+        }
+
+//        Sort the list of the number of the stops for the destination stops
+        List<Integer> sortedList = quicksort(numberOfStopsForDestinationStops);
+
+        //Input the index of best destination stop
+        results.add(numberOfStopsForDestinationStops.indexOf(sortedList.get(0)));
+        //Input the number of stops
+        results.add(sortedList.get(0));
+
+        return results;
+
     }
 }
