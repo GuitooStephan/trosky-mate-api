@@ -1,9 +1,10 @@
 package com.gtuc.troskyMate.logic;
 
 
-import com.gtuc.troskyMate.forms.JSONResponseClosestStops;
+import com.gtuc.troskyMate.forms.JSONResponse;
 import com.gtuc.troskyMate.models.Domains.BusStops;
 import com.gtuc.troskyMate.models.Services.BusStopsServices;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +23,10 @@ public class ClosestStopsLogic {
 
     private final Logger logger = LoggerFactory.getLogger(ClosestStopsLogic.class);
 
-    public JSONResponseClosestStops closestStopsRequest (String location){
+    public JSONResponse closestStopsRequest (String location){
 
         logger.info("[INFO] Request for closest stops around location");
-        JSONResponseClosestStops response = new JSONResponseClosestStops();
+        JSONResponse response = new JSONResponse();
 
         try{
             //Getting the 4 closest stops
@@ -39,13 +40,18 @@ public class ClosestStopsLogic {
             logger.info("[INFO] Setting response");
             response.setStatus(202);
             response.setMessage("Successful");
-            response.setBusStops(closestStops);
+            //set the result
+            for(BusStops stop : closestStops){
+                JSONObject obj = new JSONObject(stop);
+                response.addResult(obj.toMap());
+            }
+            logger.info("[INFO] Successful");
 
         } catch(Exception e){
             logger.error("[ERROR] Getting closest stops");
+            logger.error(e.getMessage());
             response.setStatus(404);
             response.setMessage("Error Occurred");
-            response.setBusStops(null);
         }
 
         return response;
@@ -227,7 +233,7 @@ public class ClosestStopsLogic {
     }
 
     //Display No bus Stops
-    private JSONResponseClosestStops displayNoStopFound(JSONResponseClosestStops response){
+    private JSONResponse displayNoStopFound(JSONResponse response){
         response.setStatus(404);
         response.setMessage("We don't cover this area");
 

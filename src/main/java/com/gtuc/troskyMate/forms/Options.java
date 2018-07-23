@@ -7,17 +7,22 @@ import java.util.List;
 
 public class Options {
 
-    private int pathId;
+    private int busId;
 
     private List<Buses> otherBuses = new ArrayList<Buses>();
 
-
-    public int getPathId() {
-        return pathId;
+    public Options(int busId, ArrayList<Buses> otherBuses){
+        this.busId = busId;
+        this.otherBuses = otherBuses;
     }
 
-    public void setPathId(int pathId) {
-        this.pathId = pathId;
+
+    public int getBusId() {
+        return busId;
+    }
+
+    public void setBusId(int busId) {
+        this.busId = busId;
     }
 
     public List<Buses> getOtherBuses() {

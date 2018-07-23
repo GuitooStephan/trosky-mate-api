@@ -16,6 +16,6 @@ public interface BusesRepository extends GraphRepository<Buses> {
     @Query("MATCH (n:buses) WHERE n.busName = {0} RETURN n")
     Buses findBus(String busName);
 
-    @Query("MATCH (bus:buses) WHERE (bus) - [:stopAt] -> (:busStops {busStopName:{0}}) AND (bus) - [:stopAt] -> (:busStops {busStopName:{1}}) RETURN bus;")
-    List<Buses> findBusStopingAtTwoBusStops(String busStopOrigin, String busStopDestination);
+    @Query("MATCH (bus:buses) WHERE (bus) - [:stopAt] -> (:busStops {busStopLocation:{0}}) AND (bus) - [:stopAt] -> (:busStops {busStopLocation:{1}}) RETURN bus;")
+    List<Buses> findBusStopingAtTwoBusStops(String busStopOriginLocation, String busStopDestinationLocation);
 }
