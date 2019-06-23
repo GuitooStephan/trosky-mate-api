@@ -13,7 +13,6 @@
 *.launch
 .settings/
 troskyMate.iml
-target
 # IDE - VSCode
 .vscode/*
 !.vscode/settings.json
