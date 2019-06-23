@@ -3,10 +3,17 @@ package com.gtuc.troskyMate.models.Domains;
 import org.neo4j.ogm.annotation.GraphId;
 import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Relationship;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @NodeEntity(label = "buses")
-public class Buses {
+public class Buses implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     @GraphId
     Long id;
 
@@ -16,11 +23,8 @@ public class Buses {
     @Index(unique= true)
     private String busDestination;
 
-//    @Relationship(type="hasBus", direction = "INCOMING")
-//    Set<Buses> hasBus = new HashSet<Buses>();
-//
-//    @Relationship(type="stopAt")
-//    Set<Buses> stopAt = new HashSet<Buses>();
+    @Relationship(type="stopAt")
+    private List<BusStops> busStops = new ArrayList<>();
 
 
 

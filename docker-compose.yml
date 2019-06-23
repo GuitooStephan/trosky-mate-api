@@ -1,0 +1,42 @@
+version: '3.3'
+
+services:
+  redis:
+    image: healthcheck/redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis:/data
+    networks:
+      - neo4j_go_net
+  neo4j:
+    image: neo4j:3.4.5
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - ./neo4j/data:/data
+    networks: 
+      - neo4j_go_net
+    environment:
+      NEO4J_AUTH: "none"
+      NEO4J_BOLT_PORT_NUMBER: "7687"
+      NEO4J_HTTP_PORT_NUMBER: "7474"
+  api:
+    build : .
+    ports:
+      - "8080:8080"
+    env_file: .env
+    networks: 
+      - neo4j_go_net
+    links:
+      - neo4j
+      - redis:redis
+    depends_on:
+      - neo4j
+      - redis
+networks:
+  neo4j_go_net:
+    driver: bridge
+volumes:
+  redis:
