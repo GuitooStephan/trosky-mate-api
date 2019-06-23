@@ -3,6 +3,7 @@ package com.gtuc.troskyMate.models.Services;
 import com.gtuc.troskyMate.models.Domains.BusStops;
 import com.gtuc.troskyMate.models.Repositories.BusStopsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,11 @@ public class BusStopsServices {
     public List<BusStops> findAll() {return repositories.findAll();}
 
     //Query for a bus Stop
-    public BusStops findBusStop(String busStopLocation){return repositories.findBusStop(busStopLocation);}
+    @Cacheable(value = "busStopCache", key = "#busStopLocation")
+    public BusStops findBusStop(String busStopLocation){
+        System.out.println("----------------->>no caching");
+        return repositories.findBusStop(busStopLocation);
+    }
 
 
     //Query all bus stops from origin to destination
@@ -54,24 +59,6 @@ public class BusStopsServices {
                 return repositories.findPathsForSixStop(busStopOriginLocation, busStopDestinationLocation);
             default:
                 return null;
-        }
-    }
-
-    //Get the number paths between the origin and the destination by the radius
-    //1 bus -- 2 radius
-    //2 buses -- 4 radius
-    public Integer findNumberOfPathsByRadius(String busStopOriginLocation, String busStopDestinationLocation, Integer radius){
-        switch (radius){
-            case 2 :
-                return repositories.findNumberOfPathsForOneStop(busStopOriginLocation, busStopDestinationLocation);
-            case 4:
-                return repositories.findNumberOfPathsForTwoBus(busStopOriginLocation, busStopDestinationLocation);
-            case 6:
-                return repositories.findNumberOfPathsForThreeBus(busStopOriginLocation, busStopDestinationLocation);
-            case 8:
-                return repositories.findNumberOfPathsForFourBus(busStopOriginLocation, busStopDestinationLocation);
-            default:
-                return 0;
         }
     }
 

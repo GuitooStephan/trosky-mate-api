@@ -43,4 +43,18 @@ public class JSONResponse {
     public void addResult(Map<String, Object> result) {
         this.result.add(result);
     }
+
+    /**
+     * This method sets the response as not found
+     * @return JSONResponse
+     */
+    public void setNotFound() {
+        this.status = 404;
+        this.message = "We don't cover this area";
+    }
+
+    public void setAsSuccessful() {
+        this.status = 202;
+        this.message = "Successful";
+    }
 }

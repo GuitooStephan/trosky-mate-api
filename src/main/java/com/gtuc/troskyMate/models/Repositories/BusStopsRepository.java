@@ -3,14 +3,15 @@ package com.gtuc.troskyMate.models.Repositories;
 import com.gtuc.troskyMate.models.Domains.BusStops;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.neo4j.annotation.Query;
-import org.springframework.data.neo4j.repository.GraphRepository;
+import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Repository
-public interface BusStopsRepository extends GraphRepository<BusStops>{
+public interface BusStopsRepository extends Neo4jRepository<BusStops, Long>{
 
     //Query all bus stops
     List<BusStops> findAll();
@@ -37,6 +38,7 @@ public interface BusStopsRepository extends GraphRepository<BusStops>{
 
 
     //Get the path between two bus stops
+    // TODO: 17/06/19 Optimize queries
     @Query("MATCH p=(n:busStops{busStopLocation:{0}})-[*..1]-(stop:busStops{busStopLocation:{1}}) RETURN p")
     List<List<String>> findPathsForOneStop(String busStopOriginLocation, String busStopDestinationLocation);
 

@@ -3,9 +3,15 @@ package com.gtuc.troskyMate.models.Domains;
 import org.neo4j.ogm.annotation.GraphId;
 import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Relationship;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @NodeEntity(label = "busStops")
-public class BusStops {
+public class BusStops implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     @GraphId
     private
@@ -17,12 +23,11 @@ public class BusStops {
     @Index
     private String [] busStopArea;
 
-
-
-
-
     @Index(unique = true)
     private String busStopLocation;
+
+    @Relationship(type="stopAt", direction = Relationship.INCOMING)
+    List<Buses> hasBus = new ArrayList<>();
 
 
     public Long getId() {
