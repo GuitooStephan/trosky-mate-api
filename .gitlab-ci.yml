@@ -5,7 +5,7 @@ stages:
 
 build:
   stage: build
-  script: mvn package
+  script: ./mvn package
   artifacts:
     paths:
       - target/*.jar
