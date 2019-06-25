@@ -12,5 +12,7 @@ build:
 
 test:
   image: docker:latest
+  services:
+    - docker:dind
   stage: test
   script: docker build
