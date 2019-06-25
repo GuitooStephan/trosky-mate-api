@@ -15,4 +15,4 @@ test:
   services:
     - docker:dind
   stage: test
-  script: docker build
+  script: docker build .
