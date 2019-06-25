@@ -1,11 +1,11 @@
-image: ibmjava:8-sdk-alpine
+image: 3-ibmjava-8-alpine
 
 stages:
   - build
 
 build:
   stage: build
-  script: ./mvn package
+  script: mvn package
   artifacts:
     paths:
       - target/*.jar
