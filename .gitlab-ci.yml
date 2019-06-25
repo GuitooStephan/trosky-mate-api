@@ -1,5 +1,3 @@
-image: maven:3.3.9-jdk-8
-
 stages:
   - build
   - test
@@ -7,10 +5,12 @@ stages:
 build:
   stage: build
   script: mvn package
+  image: maven:3.3.9-jdk-8
   artifacts:
     paths:
       - target/*.jar
 
 test:
+  image: docker:latest
   stage: test
-  script: docker-compose up --build
+  script: docker build .
