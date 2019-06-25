@@ -13,4 +13,4 @@ build:
 test:
   image: docker:latest
   stage: test
-  script: docker build .
+  script: docker build
