@@ -11,4 +11,4 @@ build:
   script: ./mvnw package
   artifacts:
     paths:
-      - target/*.jar 
+      - target/*.jar

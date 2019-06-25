@@ -10,6 +10,7 @@
 .project
 .classpath
 .c9/
+.env
 *.launch
 .settings/
 troskyMate.iml
