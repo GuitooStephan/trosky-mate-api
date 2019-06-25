@@ -1,6 +1,7 @@
 stages:
   - build
   - test
+  - deploy_staging
 
 build:
   stage: build
@@ -16,3 +17,13 @@ test:
     - docker:dind
   stage: test
   script: docker build .
+
+deploy_staging:
+  stage: deploy_staging
+  script:
+    - echo "Deploy to staging server"
+  environment:
+    name: staging
+  when: manual
+  only:
+    - master
