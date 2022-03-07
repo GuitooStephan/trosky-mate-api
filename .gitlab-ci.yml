@@ -1,0 +1,29 @@
+stages:
+  - build
+  - test
+  - deploy_staging
+
+build:
+  stage: build
+  script: mvn package
+  image: maven:3.3.9-jdk-8
+  artifacts:
+    paths:
+      - target/*.jar
+
+test:
+  image: docker:latest
+  services:
+    - docker:dind
+  stage: test
+  script: docker build .
+
+deploy_staging:
+  stage: deploy_staging
+  script:
+    - echo "Deploy to staging server"
+  environment:
+    name: staging
+  when: manual
+  only:
+    - master

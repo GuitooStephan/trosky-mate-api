@@ -10,10 +10,10 @@
 .project
 .classpath
 .c9/
+.env
 *.launch
 .settings/
 troskyMate.iml
-target
 # IDE - VSCode
 .vscode/*
 !.vscode/settings.json
